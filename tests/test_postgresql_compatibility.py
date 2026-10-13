@@ -64,3 +64,15 @@ def test_rag_sqlalchemy_search():
     assert "content" in top
     assert "Cotton" in top["crop"] or "Cotton" in top["title"]
     assert top["score"] > 0
+
+def test_vercel_configuration():
+    """Verify vercel.json uses modern rewrites without deprecated builds array."""
+    import json
+    from pathlib import Path
+    vercel_path = Path(__file__).resolve().parent.parent / "vercel.json"
+    assert vercel_path.exists()
+    with open(vercel_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    assert "builds" not in data, "Legacy 'builds' causes Vercel settings warning"
+    assert "rewrites" in data
+    assert any(r.get("destination") == "/main.py" for r in data["rewrites"])
