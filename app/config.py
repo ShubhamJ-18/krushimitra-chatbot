@@ -45,9 +45,14 @@ class Settings(BaseSettings):
         if not v:
             return v
         v_str = str(v).strip()
-        # Handle postgres:// connection strings from providers like Supabase, Render, Neon
+        # Explicitly map PostgreSQL connection strings to postgresql+psycopg2://
+        # to ensure SQLAlchemy uses the installed psycopg2-binary driver rather than psycopg 3
         if v_str.startswith("postgres://"):
-            return "postgresql://" + v_str[len("postgres://"):]
+            return "postgresql+psycopg2://" + v_str[len("postgres://"):]
+        if v_str.startswith("postgresql+psycopg://"):
+            return "postgresql+psycopg2://" + v_str[len("postgresql+psycopg://"):]
+        if v_str.startswith("postgresql://"):
+            return "postgresql+psycopg2://" + v_str[len("postgresql://"):]
         return v_str
 
     def model_post_init(self, __context: Any) -> None:
@@ -69,11 +74,15 @@ class Settings(BaseSettings):
     def get_database_url(self) -> str:
         """
         Returns the effective normalized database URL.
-        Converts postgres:// to postgresql:// for SQLAlchemy.
+        Explicitly maps PostgreSQL URLs to postgresql+psycopg2:// to match psycopg2-binary.
         """
-        raw_url = (self.DATABASE_URL or "").strip()
+        raw_url = (self.DATABASE_URL or os.getenv("DATABASE_URL") or "").strip()
         if raw_url.startswith("postgres://"):
-            raw_url = "postgresql://" + raw_url[len("postgres://"):]
+            raw_url = "postgresql+psycopg2://" + raw_url[len("postgres://"):]
+        elif raw_url.startswith("postgresql+psycopg://"):
+            raw_url = "postgresql+psycopg2://" + raw_url[len("postgresql+psycopg://"):]
+        elif raw_url.startswith("postgresql://"):
+            raw_url = "postgresql+psycopg2://" + raw_url[len("postgresql://"):]
         return raw_url
 
     def is_production_or_vercel(self) -> bool:

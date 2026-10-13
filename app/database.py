@@ -32,7 +32,12 @@ def _get_initial_url() -> str:
     return url
 
 # Global engine and session factory initialized safely at module scope
-engine = _build_engine(_get_initial_url())
+try:
+    engine = _build_engine(_get_initial_url())
+except Exception as _init_err:
+    logger.warning(f"Initial engine construction deferred: {_init_err}. Using fallback placeholder.")
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def refresh_engine_if_needed():
@@ -44,8 +49,8 @@ def refresh_engine_if_needed():
     configured_url = settings.get_database_url()
     current_engine_url = str(engine.url) if engine else ""
 
-    if configured_url and current_engine_url == "sqlite:///:memory:":
-        logger.info(f"Connecting database engine to configured target: {settings.APP_NAME}")
+    if configured_url and (current_engine_url == "sqlite:///:memory:" or current_engine_url != configured_url):
+        logger.info("Configuring database engine for active request session")
         engine = _build_engine(configured_url)
         SessionLocal.configure(bind=engine)
     return engine

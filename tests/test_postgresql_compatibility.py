@@ -6,17 +6,31 @@ from app.database import Base, check_database_connection, engine
 from app.models.conversation import Conversation, Message, FarmerProfile, Feedback, RAGDocument
 from app.services.rag_service import RAGService
 
-def test_database_url_normalization_postgres_to_postgresql():
-    """Verify postgres:// URLs are automatically transformed to postgresql:// for SQLAlchemy."""
+def test_database_url_normalization_postgres_to_postgresql_psycopg2():
+    """Verify postgres:// URLs are automatically transformed to postgresql+psycopg2:// for SQLAlchemy."""
     s = Settings(DATABASE_URL="postgres://user:secret123@neon.tech:5432/neondb")
-    assert s.DATABASE_URL == "postgresql://user:secret123@neon.tech:5432/neondb"
-    assert s.get_database_url() == "postgresql://user:secret123@neon.tech:5432/neondb"
+    assert s.DATABASE_URL == "postgresql+psycopg2://user:secret123@neon.tech:5432/neondb"
+    assert s.get_database_url() == "postgresql+psycopg2://user:secret123@neon.tech:5432/neondb"
 
 def test_database_url_normalization_standard_postgresql():
-    """Verify postgresql:// URLs remain intact."""
+    """Verify postgresql:// URLs are normalized to postgresql+psycopg2:// matching psycopg2-binary."""
     url = "postgresql://user:secret123@supabase.co:5432/postgres"
     s = Settings(DATABASE_URL=url)
-    assert s.get_database_url() == url
+    assert s.get_database_url() == "postgresql+psycopg2://user:secret123@supabase.co:5432/postgres"
+
+def test_database_url_normalization_psycopg_to_psycopg2():
+    """Verify postgresql+psycopg:// URLs are corrected to postgresql+psycopg2://."""
+    url = "postgresql+psycopg://user:secret123@supabase.co:5432/postgres"
+    s = Settings(DATABASE_URL=url)
+    assert s.get_database_url() == "postgresql+psycopg2://user:secret123@supabase.co:5432/postgres"
+
+def test_engine_selects_psycopg2_driver():
+    """Verify engine creation uses psycopg2 and does not attempt to import psycopg3."""
+    from sqlalchemy import create_engine
+    s = Settings(DATABASE_URL="postgresql://user:secret123@localhost/dbname")
+    eng = create_engine(s.get_database_url())
+    assert eng.dialect.driver == "psycopg2"
+    assert "psycopg2" in eng.dialect.__module__
 
 def test_root_main_imports_cleanly_without_database_url():
     """Verify root main.py imports cleanly without raising errors at module import time."""
