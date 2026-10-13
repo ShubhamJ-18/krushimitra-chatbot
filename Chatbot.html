@@ -1,0 +1,3306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KrushiMitra AI — प्रगत शेती सल्लागार (Advanced Farmer Assistant)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* Green agricultural palette */
+  --g1:#0a3d00;
+  --g2:#155d0a;
+  --g3:#1e7a10;
+  --g4:#28961a;
+  --g5:#38b224;
+  --g6:#52cc3a;
+  --g7:#74e050;
+  --g8:#a8f080;
+
+  /* Surfaces & neutrals */
+  --white:#ffffff;
+  --off-white:#f7fdf4;
+  --bg:#f0f9eb;
+  --bg2:#e6f5df;
+  --border:#cce8bb;
+  --border-strong:#a8d490;
+
+  /* Text hierarchy */
+  --text:#0f2a08;
+  --text2:#2d5a1e;
+  --text3:#4a7a35;
+  --text4:#78a860;
+  --text-muted:#88b070;
+
+  /* Status colors */
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --amber:#d97706;
+  --amber-bg:#fffbeb;
+  --blue:#2563eb;
+  --blue-bg:#eff6ff;
+
+  /* Shadows */
+  --shadow-xs:0 1px 3px rgba(30,120,16,.08);
+  --shadow-sm:0 2px 8px rgba(30,120,16,.10);
+  --shadow-md:0 4px 16px rgba(30,120,16,.12);
+  --shadow-lg:0 8px 32px rgba(30,120,16,.15);
+  --shadow-xl:0 16px 48px rgba(30,120,16,.18);
+
+  /* Dimensions */
+  --sidebar-w:270px;
+  --header-h:64px;
+  --radius:14px;
+  --radius-sm:9px;
+  --radius-xs:6px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  display:flex;height:100vh;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--g4)}
+
+/* Ambient backgrounds */
+.bg-grid{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(40,150,26,.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(40,150,26,.04) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.bg-orb{
+  position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.28;
+}
+.orb1{width:360px;height:360px;background:var(--g7);top:-100px;right:-100px}
+.orb2{width:420px;height:420px;background:var(--g8);bottom:-120px;left:100px}
+
+/* ═══════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);
+  display:flex;flex-direction:column;
+  border-right:1.5px solid var(--border);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  position:relative;z-index:20;
+}
+.sidebar-brand{
+  padding:18px 18px 16px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1.5px solid var(--border);
+  background:linear-gradient(135deg,var(--g1) 0%,var(--g3) 100%);
+  color:#fff;
+}
+.brand-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.brand-text{
+  font-family:'Fraunces',serif;
+  font-size:18px;font-weight:900;color:#fff;
+  line-height:1.15;letter-spacing:-.2px;
+}
+.brand-sub{font-size:10.5px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600}
+
+.new-chat-btn{
+  margin:12px 14px 6px;
+  background:linear-gradient(135deg,var(--g3),var(--g5));
+  color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:10px 14px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:.2s;box-shadow:var(--shadow-sm);
+}
+.new-chat-btn:hover{background:linear-gradient(135deg,var(--g2),var(--g4));transform:translateY(-1px);box-shadow:var(--shadow-md)}
+
+.sb-section{
+  padding:12px 16px 4px;
+  font-size:10px;font-weight:800;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--text-muted);
+}
+.sb-nav{display:flex;flex-direction:column;gap:3px;padding:2px 10px 8px;overflow-y:auto;max-height:280px}
+.sb-tab{
+  display:flex;align-items:center;gap:10px;
+  padding:8.5px 10px;border-radius:var(--radius-sm);
+  font-size:12.5px;font-weight:600;color:var(--text3);
+  cursor:pointer;border:none;background:none;
+  font-family:inherit;transition:.15s;text-align:left;
+  width:100%;
+}
+.sb-tab:hover{background:var(--bg2);color:var(--text)}
+.sb-tab.active{
+  background:linear-gradient(135deg,rgba(40,150,26,.14),rgba(82,204,58,.08));
+  color:var(--g2);font-weight:700;
+  border-left:3.5px solid var(--g4);
+  padding-left:7px;
+}
+.sb-tab-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{
+  margin-left:auto;background:linear-gradient(135deg,var(--g3),var(--g5));
+  color:#fff;border-radius:12px;padding:1px 6px;font-size:9.5px;font-weight:700;
+}
+
+/* History list */
+.sb-history{flex:1;overflow-y:auto;padding:0 10px 8px;min-height:90px}
+.sb-hist-item{
+  padding:7px 9px;border-radius:var(--radius-xs);
+  font-size:12px;color:var(--text2);
+  cursor:pointer;transition:.15s;
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+}
+.sb-hist-item:hover{background:var(--bg2);color:var(--g1)}
+.sb-hist-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.sb-hist-del{
+  opacity:0;transition:.15s;background:none;border:none;cursor:pointer;
+  color:var(--text4);font-size:12px;padding:2px 4px;border-radius:4px;
+}
+.sb-hist-item:hover .sb-hist-del{opacity:1}
+.sb-hist-del:hover{color:var(--red);background:var(--red-bg)}
+
+.sb-footer{
+  padding:12px 14px;
+  border-top:1.5px solid var(--border);
+  background:var(--off-white);
+  display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s;
+}
+.sb-footer:hover{background:var(--bg2)}
+.sf-av{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--g3),var(--g5));
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;color:#fff;
+  box-shadow:var(--shadow-sm);
+}
+.sf-name{font-size:12.5px;font-weight:700;color:var(--text)}
+.sf-sub{font-size:10.5px;color:var(--text3);font-weight:500}
+
+/* ═══════════════════════════════════
+   MAIN CONTAINER
+═══════════════════════════════════ */
+.main{
+  flex:1;display:flex;flex-direction:column;
+  min-width:0;background:var(--bg);position:relative;
+  overflow:hidden;z-index:5;
+}
+
+/* TOPBAR */
+.topbar{
+  height:var(--header-h);flex-shrink:0;
+  display:flex;align-items:center;gap:12px;
+  padding:0 20px;
+  background:var(--white);
+  border-bottom:1.5px solid var(--border);
+  box-shadow:var(--shadow-xs);
+  position:relative;z-index:10;
+}
+.topbar-hamburger{
+  display:none;
+  width:36px;height:36px;border-radius:var(--radius-xs);
+  background:var(--off-white);border:1.5px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:18px;
+  align-items:center;justify-content:center;flex-shrink:0;
+}
+.topbar-breadcrumb{display:flex;align-items:center;gap:6px}
+.topbar-title{font-family:'Fraunces',serif;font-size:17px;font-weight:900;color:var(--text)}
+.tb-sep{color:var(--text4);font-size:13px}
+.tb-cur{font-size:13px;font-weight:700;color:var(--g3)}
+
+.topbar-center{flex:1;display:flex;justify-content:center;align-items:center;gap:10px}
+.lang-select{
+  background:var(--off-white);
+  border:1.5px solid var(--border);
+  color:var(--text);border-radius:var(--radius-xs);
+  padding:6px 12px;font-size:12.5px;font-weight:700;
+  font-family:inherit;outline:none;cursor:pointer;transition:.15s;
+}
+.lang-select:focus{border-color:var(--g4);box-shadow:0 0 0 3px rgba(40,150,26,.1)}
+
+.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.loc-pill{
+  display:flex;align-items:center;gap:5px;
+  background:var(--off-white);border:1.5px solid var(--border);
+  border-radius:20px;padding:4px 10px;font-size:11.5px;font-weight:700;
+  color:var(--text2);cursor:pointer;transition:.15s;
+}
+.loc-pill:hover{background:var(--bg2);border-color:var(--border-strong)}
+.conn-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(56,178,36,.1);border:1.5px solid rgba(56,178,36,.3);
+  border-radius:20px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:var(--g2);
+}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--g4);animation:dotPulse 2s infinite}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+
+/* Offline notice banner */
+.offline-banner{
+  background:#fffbeb;border-bottom:1.5px solid #fde68a;
+  padding:6px 16px;font-size:11.5px;font-weight:600;color:#92400e;
+  display:none;align-items:center;justify-content:center;gap:8px;
+}
+
+/* ═══════════════════════════════════
+   PANELS
+═══════════════════════════════════ */
+.panel{display:none;flex:1;flex-direction:column;overflow:hidden;position:relative}
+.panel.active{display:flex}
+
+/* ── PANEL: CHAT ── */
+.messages-wrap{flex:1;overflow-y:auto;padding:20px 24px}
+.messages-inner{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+.welcome-screen{
+  text-align:center;padding:24px 16px;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);
+}
+.ws-glow{font-size:42px;margin-bottom:8px}
+.ws-title{font-family:'Fraunces',serif;font-size:24px;font-weight:900;color:var(--text);margin-bottom:6px}
+.ws-title span{color:var(--g3)}
+.ws-sub{font-size:13.5px;color:var(--text3);line-height:1.55;max-width:620px;margin:0 auto 20px}
+
+.sg-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;
+  text-align:left;
+}
+.sg-card{
+  background:var(--off-white);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;cursor:pointer;
+  transition:.2s;display:flex;flex-direction:column;
+}
+.sg-card:hover{
+  border-color:var(--g4);background:var(--white);transform:translateY(-2px);
+  box-shadow:var(--shadow-md);
+}
+.sg-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sg-icon{font-size:22px}
+.sg-arrow{font-size:15px;color:var(--text4);font-weight:700}
+.sg-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px}
+.sg-sub{font-size:11.5px;color:var(--text3);line-height:1.35}
+
+/* Messages */
+.msg{display:flex;gap:12px;align-items:flex-start}
+.msg.user{flex-direction:row-reverse}
+.av{
+  width:36px;height:36px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;box-shadow:var(--shadow-xs);
+}
+.av.bot{background:linear-gradient(135deg,var(--g2),var(--g4));color:#fff}
+.av.usr{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff}
+
+.bubble-wrap{max-width:76%;display:flex;flex-direction:column;gap:5px}
+.bubble{
+  padding:14px 18px;border-radius:var(--radius);
+  font-size:13.5px;line-height:1.65;position:relative;
+}
+.bubble.bot{
+  background:var(--white);color:var(--text);
+  border:1.5px solid var(--border);box-shadow:var(--shadow-xs);
+  border-top-left-radius:3px;
+}
+.bubble.usr{
+  background:linear-gradient(135deg,var(--g2),var(--g4));
+  color:#fff;border-top-right-radius:3px;
+  box-shadow:var(--shadow-sm);
+}
+.bubble.usr strong{color:#fff}
+.bubble strong{color:var(--g1);font-weight:700}
+.bubble ul, .bubble ol{margin:6px 0 6px 20px}
+.bubble li{margin-bottom:4px}
+
+/* Citation tags in bubble */
+.source-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.source-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--off-white);border:1px solid var(--border-strong);
+  border-radius:14px;padding:2px 9px;font-size:11px;font-weight:600;
+  color:var(--g2);text-decoration:none;transition:.15s;
+}
+.source-pill:hover{background:var(--bg2);color:var(--g1);border-color:var(--g4)}
+
+.bubble-meta{display:flex;align-items:center;gap:10px;padding:0 4px}
+.bm-btn{
+  background:none;border:none;cursor:pointer;color:var(--text3);
+  font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px;
+  padding:2px 6px;border-radius:4px;transition:.15s;font-family:inherit;
+}
+.bm-btn:hover{background:var(--bg2);color:var(--g2)}
+.bm-btn.speaking{color:var(--red);background:var(--red-bg)}
+
+.typing-wrap{display:flex;gap:12px;align-items:center}
+.typing-bbl{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:16px;padding:12px 18px;display:flex;gap:6px;align-items:center;
+}
+.td{width:7px;height:7px;border-radius:50%;background:var(--g4);animation:tdAnim .8s infinite alternate}
+.td:nth-child(2){animation-delay:.25s}
+.td:nth-child(3){animation-delay:.5s}
+@keyframes tdAnim{from{opacity:.3;transform:translateY(0)}to{opacity:1;transform:translateY(-5px)}}
+
+/* Quick chips */
+.quick-row{
+  padding:8px 20px;display:flex;gap:8px;overflow-x:auto;
+  background:var(--white);border-top:1.5px solid var(--border);
+  flex-shrink:0;
+}
+.qbtn{
+  white-space:nowrap;background:var(--off-white);border:1.5px solid var(--border);
+  border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;
+  color:var(--text2);cursor:pointer;transition:.15s;font-family:inherit;
+}
+.qbtn:hover{background:var(--bg2);border-color:var(--border-strong);transform:translateY(-1px)}
+
+/* Chat input area */
+.input-area{
+  padding:12px 20px 16px;background:var(--white);
+  border-top:1px solid rgba(40,150,26,.15);flex-shrink:0;
+}
+.input-box{
+  max-width:860px;margin:0 auto;background:var(--off-white);
+  border:1.5px solid var(--border);border-radius:16px;
+  padding:8px 12px;display:flex;align-items:flex-end;gap:8px;
+  box-shadow:var(--shadow-sm);transition:.15s;
+}
+.input-box:focus-within{border-color:var(--g4);box-shadow:0 0 0 3px rgba(40,150,26,.12);background:var(--white)}
+.input-box textarea{
+  flex:1;background:transparent;border:none;outline:none;
+  font-family:inherit;font-size:13.5px;line-height:1.45;
+  color:var(--text);resize:none;max-height:130px;padding:6px 2px;
+}
+.ib-btns{display:flex;align-items:center;gap:6px}
+.ib-btn{
+  width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+  font-size:16px;
+}
+.mic-btn{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+.mic-btn:hover{background:var(--border)}
+.mic-btn.recording{background:var(--red);color:#fff;animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1);box-shadow:0 0 12px rgba(220,38,38,.5)}}
+.send-btn{background:linear-gradient(135deg,var(--g3),var(--g5));color:#fff}
+.send-btn:hover{background:linear-gradient(135deg,var(--g2),var(--g4))}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+
+.input-hint{
+  max-width:860px;margin:8px auto 0;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:11px;color:var(--text-muted);font-weight:600;
+}
+.hint-dot{width:4px;height:4px;border-radius:50%;background:var(--border-strong)}
+
+/* ── SHARED SCROLL PANEL STYLES (Modules) ── */
+.module-scroll{flex:1;overflow-y:auto;padding:24px 20px}
+.module-inner{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+.module-header{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.mh-title{font-family:'Fraunces',serif;font-size:20px;font-weight:900;color:var(--text);margin-bottom:4px}
+.mh-sub{font-size:13px;color:var(--text3);line-height:1.45}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-xs);
+}
+.card h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card p{font-size:12.5px;color:var(--text3);line-height:1.5;margin-bottom:12px}
+
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.form-control{
+  width:100%;background:var(--off-white);border:1.5px solid var(--border);
+  border-radius:var(--radius-xs);padding:8px 12px;font-size:13px;font-family:inherit;
+  color:var(--text);outline:none;transition:.15s;
+}
+.form-control:focus{border-color:var(--g4);background:var(--white)}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--g3),var(--g5));
+  color:#fff;border:none;border-radius:var(--radius-xs);
+  padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;transition:.15s;
+}
+.btn-primary:hover{background:linear-gradient(135deg,var(--g2),var(--g4));transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+.btn-outline{
+  background:var(--white);color:var(--g2);border:1.5px solid var(--border-strong);
+  border-radius:var(--radius-xs);padding:9px 16px;font-size:12.5px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.15s;
+}
+.btn-outline:hover{background:var(--bg2)}
+
+/* ── PEST & VISION MODULE ── */
+.upload-zone{
+  background:var(--white);border:2px dashed var(--border-strong);
+  border-radius:var(--radius);padding:32px 20px;text-align:center;
+  cursor:pointer;transition:.2s;
+}
+.upload-zone:hover{border-color:var(--g4);background:var(--off-white)}
+.uz-icon{font-size:44px;margin-bottom:10px;display:block}
+.uz-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.uz-sub{font-size:12px;color:var(--text3);margin-bottom:14px}
+.uz-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--g3),var(--g5));color:#fff;
+  border-radius:20px;padding:7px 16px;font-size:12.5px;font-weight:700;
+}
+
+.pest-preview-grid{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.pest-preview-item{position:relative;width:95px;height:95px;border-radius:10px;overflow:hidden;border:1.5px solid var(--border)}
+.pest-preview-item img{width:100%;height:100%;object-fit:cover}
+.pest-preview-remove{
+  position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;
+  border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;
+}
+
+.pest-result-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-sm);margin-top:16px;
+}
+.prc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.sev-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.sev-high{background:#fee2e2;color:#b91c1c}
+.sev-med{background:#fef3c7;color:#b45309}
+.sev-low{background:#dcfce7;color:#15803d}
+.prc-body{font-size:13.5px;line-height:1.65;color:var(--text)}
+
+/* ── WEATHER MODULE ── */
+.weather-hero{
+  background:linear-gradient(135deg,#064e3b 0%,#047857 100%);color:#fff;
+  border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-md);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+}
+.wh-temp{font-size:48px;font-weight:900;font-family:'Fraunces',serif;line-height:1}
+.wh-cond{font-size:16px;font-weight:600;opacity:.9;margin-top:4px}
+.wh-details{display:flex;gap:16px;flex-wrap:wrap}
+.wh-badge{background:rgba(255,255,255,.15);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600}
+
+.advisory-box{
+  border-left:4px solid;border-radius:var(--radius-xs);padding:14px;
+  background:var(--white);margin-top:12px;
+}
+.adv-green{border-color:var(--g5);background:#f0fdf4}
+.adv-yellow{border-color:var(--amber);background:#fffbeb}
+.adv-red{border-color:var(--red);background:#fef2f2}
+
+/* ── MANDI PRICES MODULE ── */
+.mandi-table-wrap{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--radius);overflow-x:auto;box-shadow:var(--shadow-xs);
+}
+.mandi-table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.mandi-table th{background:var(--off-white);padding:12px 14px;font-weight:700;color:var(--text2);border-bottom:1.5px solid var(--border)}
+.mandi-table td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text)}
+.mandi-table tr:hover td{background:var(--bg2)}
+.price-modal{font-weight:800;color:var(--g2);font-size:14px}
+
+/* Modal styles */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  display:none;align-items:center;justify-content:center;z-index:100;
+  backdrop-filter:blur(3px);padding:16px;
+}
+.modal-overlay.open{display:flex}
+.modal-card{
+  background:var(--white);border-radius:var(--radius);
+  max-width:520px;width:100%;max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow-xl);padding:24px;position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;background:none;border:none;
+  font-size:18px;cursor:pointer;color:var(--text4);
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(30px);
+  background:var(--g1);color:#fff;padding:9px 18px;border-radius:30px;
+  font-size:12.5px;font-weight:700;box-shadow:var(--shadow-lg);
+  opacity:0;pointer-events:none;transition:.25s cubic-bezier(.4,0,.2,1);z-index:999;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-xl)}
+  .topbar-hamburger{display:flex}
+  .bubble-wrap{max-width:88%}
+  .sg-grid{grid-template-columns:1fr}
+  .topbar{padding:0 12px}
+  .messages-wrap{padding:14px 12px}
+  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:15}
+  .sidebar.open ~ .sb-overlay{display:block}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NEW SIMPLIFIED, ACCESSIBLE CROP DOCTOR STYLES
+══════════════════════════════════════════════════════════════ */
+.cd-flow-container { max-width: 760px; margin: 0 auto; width: 100%; }
+.cd-main-heading { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 900; color: var(--g1); line-height: 1.25; margin-bottom: 6px; }
+.cd-sub-heading { font-size: 14.5px; color: var(--text3); margin-bottom: 22px; line-height: 1.45; }
+.cd-lang-bar { display: flex; gap: 8px; }
+.cd-lang-pill { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--white); color: var(--text2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s ease; }
+.cd-lang-pill.active { background: var(--g3); color: var(--white); border-color: var(--g3); box-shadow: var(--shadow-xs); }
+
+/* 3 Large Action Cards on Home Screen */
+.cd-hero-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 20px; }
+.cd-hero-card { display: flex; align-items: center; gap: 18px; padding: 20px 22px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--white); cursor: pointer; text-align: left; transition: all .2s cubic-bezier(.4,0,.2,1); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+.cd-hero-card:hover { border-color: var(--g4); transform: translateY(-2px); box-shadow: var(--shadow-md); background: var(--off-white); }
+.cd-hero-card:active { transform: translateY(0); }
+.cd-hero-icon { width: 62px; height: 62px; flex-shrink: 0; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; background: var(--bg2); box-shadow: var(--shadow-xs); }
+.cd-hero-card.hero-photo .cd-hero-icon { background: #e0f2fe; }
+.cd-hero-card.hero-voice .cd-hero-icon { background: #dcfce7; }
+.cd-hero-card.hero-problem .cd-hero-icon { background: #fef3c7; }
+.cd-hero-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.cd-hero-sub { font-size: 13px; color: var(--text3); line-height: 1.35; }
+.cd-hero-arrow { margin-left: auto; font-size: 20px; color: var(--g4); font-weight: 800; }
+
+/* Voice Screen */
+.cd-voice-wrap { text-align: center; padding: 24px 16px; }
+.cd-mic-pulse-btn { width: 96px; height: 96px; border-radius: 50%; border: none; background: linear-gradient(135deg, var(--g4), var(--g2)); color: var(--white); font-size: 42px; cursor: pointer; margin: 14px auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(40,150,26,.6), var(--shadow-md); transition: all .2s ease; }
+.cd-mic-pulse-btn.listening { animation: cdPulse 1.4s infinite; background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
+@keyframes cdPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,.6); } 70% { transform: scale(1.08); box-shadow: 0 0 0 22px rgba(239,68,68,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+.cd-voice-status { font-size: 16px; font-weight: 700; color: var(--text2); margin-bottom: 12px; }
+.cd-transcript-card { background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); padding: 18px 20px; font-size: 18px; line-height: 1.5; color: var(--text); text-align: left; min-height: 80px; margin-bottom: 18px; font-weight: 600; }
+.cd-transcript-card:empty::before { content: "येथे तुमचे बोलणे दिसेल... (Your words will appear here)"; color: var(--text-muted); font-weight: 400; font-size: 15px; }
+
+/* Picture Crop Grid */
+.cd-crop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+.cd-crop-card { padding: 16px 10px; background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); text-align: center; cursor: pointer; transition: all .15s ease; box-shadow: var(--shadow-xs); }
+.cd-crop-card:hover, .cd-crop-card.selected { border-color: var(--g4); background: var(--off-white); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.cd-crop-card.selected { border-width: 2.5px; background: var(--bg2); }
+.cd-crop-card-icon { font-size: 38px; margin-bottom: 8px; display: block; }
+.cd-crop-card-name { font-size: 14.5px; font-weight: 800; color: var(--text); }
+.cd-crop-card-sub { font-size: 11.5px; color: var(--text3); }
+
+/* Picture Problem Grid */
+.cd-prob-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin: 16px 0; }
+.cd-prob-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer; text-align: left; transition: all .15s ease; box-shadow: var(--shadow-xs); }
+.cd-prob-card:hover, .cd-prob-card.selected { border-color: var(--g4); background: var(--off-white); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.cd-prob-icon { font-size: 32px; width: 48px; height: 48px; border-radius: 12px; background: var(--bg2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cd-prob-text { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.3; }
+.cd-prob-sub { font-size: 11.5px; color: var(--text3); font-weight: 500; }
+
+/* Follow-up question card */
+.cd-fu-card { background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+.cd-fu-title { font-size: 18px; font-weight: 800; color: var(--g1); margin-bottom: 16px; }
+.cd-fu-options { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.cd-fu-btn { padding: 15px 18px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 15px; font-weight: 700; color: var(--text); text-align: left; cursor: pointer; transition: all .15s ease; display: flex; align-items: center; gap: 10px; }
+.cd-fu-btn:hover { border-color: var(--g4); background: var(--white); transform: translateX(4px); }
+
+/* Visual Result Screen */
+.cd-res-card { background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow-md); }
+.cd-res-sec { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
+.cd-res-sec:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.cd-res-label { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.cd-res-label.c-notice { color: #0284c7; }
+.cd-res-label.c-reason { color: #d97706; }
+.cd-res-label.c-action { color: #15803d; }
+.cd-res-label.c-avoid { color: #dc2626; }
+.cd-res-label.c-help { color: #7c3aed; }
+.cd-res-val { font-size: 15.5px; line-height: 1.5; color: var(--text); font-weight: 500; }
+.cd-action-list { list-style: none; padding: 0; margin: 8px 0 0 0; }
+.cd-action-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; font-size: 15px; line-height: 1.45; }
+.cd-action-num { width: 26px; height: 26px; border-radius: 50%; background: var(--g3); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.cd-help-box { background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.cd-call-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 20px; background: #7c3aed; color: var(--white); font-size: 14px; font-weight: 800; text-decoration: none; box-shadow: var(--shadow-xs); }
+.cd-listen-bar { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.cd-listen-btn { flex: 1; min-width: 200px; padding: 14px 20px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--g3), var(--g1)); color: var(--white); border: none; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-sm); }
+.cd-listen-btn:hover { background: linear-gradient(135deg, var(--g4), var(--g2)); }
+.cd-listen-btn.speaking { background: linear-gradient(135deg, #ea580c, #c2410c); animation: cdPulse 1.5s infinite; }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar" id="sidebar">
+
+  <div class="sidebar-brand">
+    <div class="brand-icon">🌾</div>
+    <div>
+      <div class="brand-text">KrushiMitra AI</div>
+      <div class="brand-sub">प्रगत कृषी सल्लागार · Farmer Assistant</div>
+    </div>
+  </div>
+
+  <button class="new-chat-btn" onclick="startNewConversation()">
+    <span>➕</span> <span id="uiNewChat">New Conversation</span>
+  </button>
+
+  <div class="sb-section" id="uiToolsLabel">Agricultural Services</div>
+  <div class="sb-nav">
+    <button class="sb-tab active" id="stab-chat" onclick="switchPanel('chat')">
+      <span class="sb-tab-icon">💬</span> <span id="uiTabChat">Chat Advisor</span>
+    </button>
+    <button class="sb-tab" id="stab-cropdoctor" onclick="switchPanel('cropdoctor')">
+      <span class="sb-tab-icon">🩺</span> <span id="uiTabCropDoctor">Crop Doctor</span>
+      <span class="sb-badge">Photo & Voice</span>
+    </button>
+    <button class="sb-tab" id="stab-fertilizer" onclick="switchPanel('fertilizer')">
+      <span class="sb-tab-icon">🧪</span> <span id="uiTabFert">Fertilizer Advisor</span>
+    </button>
+    <button class="sb-tab" id="stab-irrigation" onclick="switchPanel('irrigation')">
+      <span class="sb-tab-icon">💧</span> <span id="uiTabIrrig">Irrigation Advisor</span>
+    </button>
+    <button class="sb-tab" id="stab-weather" onclick="switchPanel('weather')">
+      <span class="sb-tab-icon">🌤️</span> <span id="uiTabWeather">Live Weather</span>
+    </button>
+    <button class="sb-tab" id="stab-mandi" onclick="switchPanel('mandi')">
+      <span class="sb-tab-icon">🏪</span> <span id="uiTabMandi">Mandi Prices</span>
+    </button>
+    <button class="sb-tab" id="stab-schemes" onclick="switchPanel('schemes')">
+      <span class="sb-tab-icon">🏛️</span> <span id="uiTabSchemes">Govt Schemes</span>
+    </button>
+    <button class="sb-tab" id="stab-planning" onclick="switchPanel('planning')">
+      <span class="sb-tab-icon">🗺️</span> <span id="uiTabPlan">Crop Planning</span>
+    </button>
+  </div>
+
+  <div class="sb-section" id="uiRecentLabel">Recent Chats</div>
+  <div class="sb-history" id="recentChatsList">
+    <div style="padding:14px 10px;font-size:12px;color:var(--text-muted);text-align:center;">
+      🌱 Loading conversation history...
+    </div>
+  </div>
+
+  <div class="sb-footer" onclick="openProfileModal()">
+    <div class="sf-av">👨‍🌾</div>
+    <div>
+      <div class="sf-name" id="sbFarmerName">Farmer Mitra</div>
+      <div class="sf-sub" id="sbFarmerDistrict">📍 Pune, Maharashtra</div>
+    </div>
+  </div>
+
+</nav>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="topbar-hamburger" onclick="toggleSidebar()" aria-label="Toggle navigation">☰</button>
+
+    <div class="topbar-breadcrumb">
+      <div class="topbar-title">KrushiMitra AI</div>
+      <span class="tb-sep">›</span>
+      <span class="tb-cur" id="topbarCur">Chat Advisor</span>
+    </div>
+
+    <div class="topbar-center">
+      <select class="lang-select" id="langSel" onchange="changeLanguage(this.value)">
+        <option value="Marathi">🟠 मराठी (Marathi)</option>
+        <option value="Hindi">🇮🇳 हिंदी (Hindi)</option>
+        <option value="English">🇬🇧 English</option>
+        <option value="Punjabi">🔵 ਪੰਜਾਬੀ (Punjabi)</option>
+        <option value="Tamil">🟤 தமிழ் (Tamil)</option>
+        <option value="Telugu">🟡 తెలుగు (Telugu)</option>
+        <option value="Kannada">🟣 ಕನ್ನಡ (Kannada)</option>
+        <option value="Bengali">🟢 বাংলা (Bengali)</option>
+        <option value="Gujarati">🔴 ગુજરાતી (Gujarati)</option>
+        <option value="Urdu">⚫ اردو (Urdu)</option>
+        <option value="Spanish">🇪🇸 Español</option>
+        <option value="French">🇫🇷 Français</option>
+      </select>
+    </div>
+
+    <div class="topbar-right">
+      <div class="loc-pill" onclick="openProfileModal()" id="topbarLocPill">
+        📍 <span id="topbarDistrictText">Pune</span>
+      </div>
+      <div class="conn-pill" id="connPill">
+        <div class="conn-dot"></div>
+        <span id="connStatusText">Connected</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offline Warning Banner -->
+  <div class="offline-banner" id="offlineBanner">
+    ⚠️ <span>Offline Mode: AI Backend server is offline or unreachable. Using cached agricultural knowledge.</span>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 1: CHAT ADVISOR
+  ═══════════════════════════════════ -->
+  <div class="panel active" id="panel-chat">
+
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="messages-inner" id="messages">
+
+        <div class="welcome-screen" id="welcomeScreen">
+          <div class="ws-glow">🌾</div>
+          <div class="ws-title" id="wsTitle">Welcome to <span>KrushiMitra AI</span></div>
+          <div class="ws-sub" id="wsSub">
+            🙏 Namaste! Your secure, evidence-backed agricultural advisor powered by ICAR, State Agricultural Universities (MPKV, PDKV, VNMKV), and Agromet advisories. Ask anything about crops, pests, fertilizers, or government schemes.
+          </div>
+          <div class="sg-grid" id="sgGrid">
+            <!-- Dynamically populated per language -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Quick question chips -->
+    <div class="quick-row" id="quickRow">
+      <!-- Dynamically filled based on selected language -->
+    </div>
+
+    <!-- Chat input area -->
+    <div class="input-area">
+      <div class="input-box">
+        <textarea id="userInput" placeholder="Ask about crops, yellow leaves, fertilizers, drip irrigation, or mandi prices…" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="ib-btns">
+          <button class="ib-btn mic-btn" id="micBtn" onclick="toggleVoiceSTT()" title="Speak in your language">🎤</button>
+          <button class="ib-btn send-btn" id="sendBtn" onclick="sendMessage()" title="Send question">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M14 8L2 2l2 6-2 6 12-6z" fill="white"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">
+        <span>🌱 KrushiMitra AI</span>
+        <span class="hint-dot"></span>
+        <span id="hintMultilingual">Multilingual RAG</span>
+        <span class="hint-dot"></span>
+        <span id="hintVoice">Voice Enabled</span>
+        <span class="hint-dot"></span>
+        <span>ICAR & SAU Verified Sources</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PANEL 2: CROP DOCTOR (Voice-First & Picture-Based Flow)
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-cropdoctor">
+    <div class="module-scroll">
+      <div class="module-inner cd-flow-container">
+
+        <!-- Top Header & Language Bar -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:1px">KrushiMitra AI</div>
+            <div style="font-size:17px;font-weight:900;color:var(--text)" id="cdModuleTitle">🩺 Crop Doctor · पीक डॉक्टर</div>
+          </div>
+          <div class="cd-lang-bar">
+            <button class="cd-lang-pill active" id="cdLangMr" onclick="setCdLang('Marathi')">मराठी</button>
+            <button class="cd-lang-pill" id="cdLangHi" onclick="setCdLang('Hindi')">हिंदी</button>
+            <button class="cd-lang-pill" id="cdLangEn" onclick="setCdLang('English')">English</button>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 1: HOME SCREEN ── -->
+        <div id="cdScreenHome">
+          <h2 class="cd-main-heading" id="cdHeading">Tell us what is wrong with your crop</h2>
+          <div class="cd-sub-heading" id="cdSubheading">Take a photo, speak your problem, or tap a picture option below. No typing needed.</div>
+
+          <div class="cd-hero-grid">
+            <!-- 1. Take a Photo (Camera) -->
+            <label class="cd-hero-card hero-photo" for="cdCameraInput">
+              <input type="file" id="cdCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleCdPhotoCapture(event)"/>
+              <div class="cd-hero-icon">📸</div>
+              <div>
+                <div class="cd-hero-title" id="cdHeroPhotoTitle">Take a Photo</div>
+                <div class="cd-hero-sub" id="cdHeroPhotoSub">Open camera for instant leaf & pest photo diagnosis</div>
+              </div>
+              <div class="cd-hero-arrow">➔</div>
+            </label>
+
+            <!-- 1b. Upload Photos (Gallery / Files) -->
+            <label class="cd-hero-card hero-photo" for="cdGalleryInput" style="border-left-color:#059669">
+              <input type="file" id="cdGalleryInput" accept="image/*" multiple style="display:none" onchange="handleCdPhotoCapture(event)"/>
+              <div class="cd-hero-icon">📁</div>
+              <div>
+                <div class="cd-hero-title" id="cdHeroUploadTitle">Upload Photos</div>
+                <div class="cd-hero-sub" id="cdHeroUploadSub">Select 1 or more leaf photos from phone gallery or computer</div>
+              </div>
+              <div class="cd-hero-arrow">➔</div>
+            </label>
+
+            <!-- 2. Speak Your Problem -->
+            <div class="cd-hero-card hero-voice" onclick="startCdVoiceScreen()">
+              <div class="cd-hero-icon">🎤</div>
+              <div>
+                <div class="cd-hero-title" id="cdHeroVoiceTitle">Speak Your Problem</div>
+                <div class="cd-hero-sub" id="cdHeroVoiceSub">Describe symptoms in Marathi, Hindi, or English without typing</div>
+              </div>
+              <div class="cd-hero-arrow">➔</div>
+            </div>
+
+            <!-- 3. Select a Problem -->
+            <div class="cd-hero-card hero-problem" onclick="startCdProblemScreen()">
+              <div class="cd-hero-icon">👆</div>
+              <div>
+                <div class="cd-hero-title" id="cdHeroProbTitle">Select a Problem</div>
+                <div class="cd-hero-sub" id="cdHeroProbSub">Choose from picture cards (Yellow leaves, Insects, Wilting, Spots...)</div>
+              </div>
+              <div class="cd-hero-arrow">➔</div>
+            </div>
+          </div>
+
+          <!-- Optional Quick Text Input Box -->
+          <div style="margin-top:16px;background:var(--white);padding:14px 18px;border-radius:12px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:20px">⌨️</span>
+            <input type="text" id="cdQuickTextInput" class="form-control" style="flex:1;min-width:220px" placeholder="Or type your crop problem / symptoms here (optional)..." onkeydown="if(event.key==='Enter')submitCdQuickText()"/>
+            <button class="btn-primary" onclick="submitCdQuickText()">
+              <span>🔍</span> <span id="cdQuickTextBtn">Diagnose</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 2: VOICE CONSULTATION SCREEN ── -->
+        <div id="cdScreenVoice" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <button class="btn-outline" style="padding:6px 12px" onclick="showCdScreen('home')">⬅ <span id="cdVoiceBack">Back</span></button>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text)" id="cdVoiceHeader">🎤 Speak Your Problem</h3>
+          </div>
+
+          <div class="cd-voice-wrap card">
+            <div class="cd-voice-status" id="cdVoiceStatus">Tap microphone and speak naturally</div>
+            <button class="cd-mic-pulse-btn" id="cdVoiceMicBtn" onclick="toggleCdVoiceRecording()">
+              <span id="cdVoiceMicIcon">🎤</span>
+            </button>
+            <div style="font-size:13px;color:var(--text3);margin-bottom:14px" id="cdVoiceHint">e.g. "माझ्या कापसाची पाने पिवळी पडत आहेत."</div>
+
+            <div class="cd-transcript-card" id="cdVoiceTranscriptBox"></div>
+
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button class="btn-outline" id="cdVoiceReadAloudBtn" onclick="readAloudCdVoice()" style="display:none">
+                <span>🔊</span> <span id="cdVoiceReadText">Listen What Was Heard</span>
+              </button>
+              <button class="btn-primary" id="cdVoiceSubmitBtn" onclick="confirmAndSubmitCdVoice()" style="display:none">
+                <span>✓</span> <span id="cdVoiceSubmitText">Looks Good, Analyze</span>
+              </button>
+              <button class="btn-outline" id="cdVoiceRetryBtn" onclick="resetCdVoice()" style="display:none">
+                <span>🔄</span> <span id="cdVoiceRetryText">Speak Again</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 3: PICTURE CROP SELECTOR ── -->
+        <div id="cdScreenCrop" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <button class="btn-outline" style="padding:6px 12px" onclick="handleCdBackFromCrop()">⬅ <span id="cdCropBack">Back</span></button>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text)" id="cdCropHeader">Which crop is this?</h3>
+          </div>
+          <p style="font-size:14px;color:var(--text3);margin-bottom:12px" id="cdCropSub">Tap your crop from the picture cards below:</p>
+
+          <div class="cd-crop-grid" id="cdCropGrid">
+            <div class="cd-crop-card" onclick="selectCdCrop('Cotton')">
+              <span class="cd-crop-card-icon">🌾</span>
+              <div class="cd-crop-card-name" id="cdCropCotton">Cotton</div>
+              <div class="cd-crop-card-sub">कापूस / कपास</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Soybean')">
+              <span class="cd-crop-card-icon">🌱</span>
+              <div class="cd-crop-card-name" id="cdCropSoybean">Soybean</div>
+              <div class="cd-crop-card-sub">सोयाबीन</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Tomato')">
+              <span class="cd-crop-card-icon">🍅</span>
+              <div class="cd-crop-card-name" id="cdCropTomato">Tomato</div>
+              <div class="cd-crop-card-sub">टोमॅटो / टमाटर</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Onion')">
+              <span class="cd-crop-card-icon">🧅</span>
+              <div class="cd-crop-card-name" id="cdCropOnion">Onion</div>
+              <div class="cd-crop-card-sub">कांदा / प्याज</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Sugarcane')">
+              <span class="cd-crop-card-icon">🎋</span>
+              <div class="cd-crop-card-name" id="cdCropSugarcane">Sugarcane</div>
+              <div class="cd-crop-card-sub">ऊस / गन्ना</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Wheat')">
+              <span class="cd-crop-card-icon">🌾</span>
+              <div class="cd-crop-card-name" id="cdCropWheat">Wheat</div>
+              <div class="cd-crop-card-sub">गहू / गेहूं</div>
+            </div>
+            <div class="cd-crop-card" onclick="selectCdCrop('Other Crop')">
+              <span class="cd-crop-card-icon">❓</span>
+              <div class="cd-crop-card-name" id="cdCropOther">Other Crop</div>
+              <div class="cd-crop-card-sub">इतर / अन्य</div>
+            </div>
+          </div>
+
+          <div style="text-align:center;margin-top:14px">
+            <button class="btn-outline" onclick="selectCdCrop('Not Sure')">
+              <span id="cdCropSkip">Skip / Not Sure (पुढे जा)</span> ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 4: PICTURE PROBLEM SELECTOR ── -->
+        <div id="cdScreenProblem" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <button class="btn-outline" style="padding:6px 12px" onclick="showCdScreen('home')">⬅ <span id="cdProbBack">Back</span></button>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text)" id="cdProbHeader">What problem do you see?</h3>
+          </div>
+          <p style="font-size:14px;color:var(--text3);margin-bottom:12px" id="cdProbSub">Choose from picture cards:</p>
+
+          <div class="cd-prob-grid">
+            <div class="cd-prob-card" onclick="selectCdProblem('yellow_leaves')">
+              <div class="cd-prob-icon">🍃</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbYellow">Yellow Leaves</div>
+                <div class="cd-prob-sub">पिवळी पाने / पीली पत्तियां</div>
+              </div>
+            </div>
+            <div class="cd-prob-card" onclick="selectCdProblem('pests')">
+              <div class="cd-prob-icon">🐛</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbPest">Insects / Worms</div>
+                <div class="cd-prob-sub">अळी किंवा कीड / कीड़ा-कीट</div>
+              </div>
+            </div>
+            <div class="cd-prob-card" onclick="selectCdProblem('wilting')">
+              <div class="cd-prob-icon">🍂</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbWilt">Wilting / Drying</div>
+                <div class="cd-prob-sub">वाळणे किंवा सुकणे / सूखना</div>
+              </div>
+            </div>
+            <div class="cd-prob-card" onclick="selectCdProblem('leaf_spots')">
+              <div class="cd-prob-icon">🔴</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbSpot">Leaf Spots / Blight</div>
+                <div class="cd-prob-sub">ठिपके किंवा डाग / धब्बे</div>
+              </div>
+            </div>
+            <div class="cd-prob-card" onclick="selectCdProblem('rotten_fruit')">
+              <div class="cd-prob-icon">🍇</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbRot">Rotten Fruit / Bolls</div>
+                <div class="cd-prob-sub">फळ किंवा बोंड सडणे / सड़न</div>
+              </div>
+            </div>
+            <div class="cd-prob-card" onclick="selectCdProblem('other')">
+              <div class="cd-prob-icon">❓</div>
+              <div>
+                <div class="cd-prob-text" id="cdProbOther">Other Issue</div>
+                <div class="cd-prob-sub">इतर समस्या / अन्य समस्या</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 5: PHOTO PREVIEW & ANALYSIS SCREEN ── -->
+        <div id="cdScreenPhoto" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <button class="btn-outline" style="padding:6px 12px" onclick="showCdScreen('home')">⬅ <span id="cdPhotoBack">Back</span></button>
+            <h3 style="font-size:18px;font-weight:800;color:var(--text)" id="cdPhotoHeader">📸 Photo Preview & Analysis</h3>
+          </div>
+
+          <div class="card" style="padding:20px;text-align:center">
+            <!-- Thumbnails grid for selected photos -->
+            <div id="cdPhotoGrid" class="pest-preview-grid" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:12px"></div>
+            <div id="cdPhotoCountText" style="font-size:12.5px;color:var(--text3);font-weight:600;margin-bottom:14px"></div>
+
+            <!-- Crop Badge & Change button -->
+            <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+              <div id="cdPhotoCropBadge" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;background:var(--bg2);color:var(--g3);font-size:13.5px;font-weight:800">
+                🌱 <span id="cdPhotoCropLabel">Crop:</span> <span id="cdPhotoCropName">Detecting...</span>
+              </div>
+              <button class="btn-outline" style="padding:5px 12px;font-size:12px" onclick="showCdScreen('crop')">
+                ✏️ <span id="cdPhotoChangeCropBtn">Change Crop</span>
+              </button>
+            </div>
+
+            <!-- Optional Symptom Notes + Voice Input -->
+            <div style="max-width:500px;margin:0 auto 18px;text-align:left">
+              <label style="display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px" id="cdPhotoNotesLbl">
+                📝 Optional: Describe symptoms (e.g. curling leaves, black spots):
+              </label>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="cdPhotoNotes" class="form-control" placeholder="Describe symptoms or leave blank..." />
+                <button type="button" class="btn-outline" style="padding:0 12px" id="cdPhotoMicBtn" title="Speak notes" onclick="recordCdPhotoNotes()">
+                  <span id="cdPhotoMicIcon">🎤</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button class="btn-primary" id="cdPhotoAnalyzeSubmitBtn" onclick="submitCdPhotoAnalysis()">
+                <span>🔬</span> <span id="cdPhotoAnalyzeBtn">Analyze with Crop Doctor AI</span>
+              </button>
+              <label class="btn-outline" for="cdAddMorePhotoInput" style="cursor:pointer">
+                <input type="file" id="cdAddMorePhotoInput" accept="image/*" multiple style="display:none" onchange="handleCdPhotoCapture(event)"/>
+                <span>➕</span> <span id="cdPhotoAddMoreBtn">Add More Photos</span>
+              </label>
+              <button class="btn-outline" onclick="resetCdPhotos()">
+                <span>🔄</span> <span id="cdPhotoClearBtn">Clear Photos</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 6: SINGLE FOLLOW-UP QUESTION ── -->
+        <div id="cdScreenFollowUp" style="display:none;">
+          <div class="cd-fu-card">
+            <div class="cd-fu-title" id="cdFuQuestionText">Which part of the plant is affected?</div>
+            <div class="cd-fu-options" id="cdFuOptionsContainer"></div>
+
+            <div style="text-align:right;margin-top:14px">
+              <button class="btn-outline" style="font-size:13px" onclick="skipCdFollowUp()">
+                <span id="cdFuSkip">Skip Question (माहित नाही / पुढे जा)</span> ➔
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCREEN 7: RESULT SCREEN ── -->
+        <div id="cdScreenResult" style="display:none;">
+          <!-- Loading Card -->
+          <div id="cdResultLoading" class="card" style="text-align:center;padding:32px 20px;display:none;">
+            <div class="td" style="display:inline-block"></div>
+            <h4 style="font-size:16px;font-weight:800;color:var(--text);margin-top:12px" id="cdLoadingTitle">Analyzing your crop problem...</h4>
+            <p style="font-size:13px;color:var(--text3);margin-top:4px" id="cdLoadingSub">Evaluating symptoms against university guidelines & ICAR advisories</p>
+          </div>
+
+          <!-- Structured Result Content -->
+          <div id="cdResultContent" style="display:none;">
+            <div class="cd-res-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1.5px solid var(--border);padding-bottom:12px">
+                <div>
+                  <span style="font-size:12px;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:1px" id="cdResultTag">Diagnostic Assessment</span>
+                  <h3 style="font-size:18px;font-weight:900;color:var(--text)" id="cdResultCropName">Cotton Crop Consultation</h3>
+                </div>
+                <span class="sev-badge sev-low" id="cdResultBadge">Verified</span>
+              </div>
+
+              <!-- 1. What we noticed -->
+              <div class="cd-res-sec">
+                <div class="cd-res-label c-notice"><span>👁️</span> <span id="cdLblNoticed">What we noticed:</span></div>
+                <div class="cd-res-val" id="cdValNoticed">...</div>
+              </div>
+
+              <!-- 2. Possible reason -->
+              <div class="cd-res-sec">
+                <div class="cd-res-label c-reason"><span>🔍</span> <span id="cdLblReason">Possible reason:</span></div>
+                <div class="cd-res-val" id="cdValReason">...</div>
+              </div>
+
+              <!-- 3. What you can do now -->
+              <div class="cd-res-sec">
+                <div class="cd-res-label c-action"><span>🛠️</span> <span id="cdLblActions">What you can do now:</span></div>
+                <div id="cdValActions"></div>
+              </div>
+
+              <!-- 4. What to avoid -->
+              <div class="cd-res-sec">
+                <div class="cd-res-label c-avoid"><span>⚠️</span> <span id="cdLblAvoid">What to avoid:</span></div>
+                <div class="cd-res-val" id="cdValAvoid">...</div>
+              </div>
+
+              <!-- 5. Need more help -->
+              <div class="cd-res-sec">
+                <div class="cd-res-label c-help"><span>📞</span> <span id="cdLblHelp">Need more help?</span></div>
+                <div class="cd-help-box">
+                  <div>
+                    <strong style="color:#5b21b6;font-size:14px">Kisan Call Center (Toll-Free)</strong>
+                    <div style="font-size:12px;color:#6b7280" id="cdKisanSub">Speak directly with agricultural scientists (6 AM to 10 PM)</div>
+                  </div>
+                  <a href="tel:18001801551" class="cd-call-btn">
+                    <span>📞</span> 1800-180-1551
+                  </a>
+                </div>
+              </div>
+
+              <!-- Audio Narration Listen Bar -->
+              <div class="cd-listen-bar">
+                <button class="cd-listen-btn" id="cdListenBtn" onclick="toggleCdAudioNarration()">
+                  <span id="cdListenIcon">🔊</span> <span id="cdListenBtnText">Listen Complete Advice</span>
+                </button>
+              </div>
+
+              <!-- Action Bar -->
+              <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+                <button class="btn-primary" onclick="showCdScreen('home')">
+                  <span>❓</span> <span id="cdAskAnother">Ask Another Question</span>
+                </button>
+                <button class="btn-outline" onclick="continueCdInChat()">
+                  <span>💬</span> <span id="cdContinueChat">Continue in Chat Advisor</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ═══════════════════════════════════
+       PANEL 4: FERTILIZER ADVISOR
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-fertilizer">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">🧪 Smart Fertilizer & Nutrient Advisor</div>
+            <div class="mh-sub">Calculate balanced nutrient management combining Farm Yard Manure (FYM), Biofertilizers, and targeted chemical NPK based on university guidelines.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-grid">
+            <div class="form-group">
+              <label class="form-label">Crop</label>
+              <select id="fertCrop" class="form-control" onchange="calculateFertilizerGuidance()">
+                <option value="Soybean">Soybean (सोयाबीन)</option>
+                <option value="Cotton">Cotton (कापूस)</option>
+                <option value="Onion">Onion (कांदा)</option>
+                <option value="Wheat">Wheat (गहू)</option>
+                <option value="Sugarcane">Sugarcane (ऊस)</option>
+                <option value="Tomato">Tomato (टोमॅटो)</option>
+                <option value="Gram">Chickpea / Gram (हरभरा)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Farm Area</label>
+              <select id="fertArea" class="form-control" onchange="calculateFertilizerGuidance()">
+                <option value="1">1 Acre</option>
+                <option value="2">2 Acres</option>
+                <option value="3">3 Acres</option>
+                <option value="5">5 Acres</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Application Stage</label>
+              <select id="fertStage" class="form-control" onchange="calculateFertilizerGuidance()">
+                <option value="Basal Dose (At sowing / planting)">Basal Dose (At sowing / planting)</option>
+                <option value="First Top Dressing (30 DAS)">First Top Dressing (30 DAS)</option>
+                <option value="Flowering / Tuber initiation">Flowering / Tuber initiation</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="fertRecommendationBox" style="margin-top:14px">
+            <!-- Calculated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 5: IRRIGATION ADVISOR
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-irrigation">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">💧 Irrigation & Water Budgeting Advisor</div>
+            <div class="mh-sub">MPKV Rahuri water-use efficiency recommendations for Maharashtra soils, drip scheduling, and dripper maintenance.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-grid">
+            <div class="form-group">
+              <label class="form-label">Soil Type</label>
+              <select id="irrigSoil" class="form-control" onchange="calculateIrrigationGuidance()">
+                <option value="Heavy Black Cotton (Clay >45%)">Heavy Black Cotton (Clay >45%)</option>
+                <option value="Medium Black Loam">Medium Black Loam</option>
+                <option value="Light Sandy / Murum Soil">Light Sandy / Murum Soil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Irrigation System</label>
+              <select id="irrigMethod" class="form-control" onchange="calculateIrrigationGuidance()">
+                <option value="Drip Irrigation (In-line)">Drip Irrigation (In-line)</option>
+                <option value="Sprinkler System">Sprinkler System</option>
+                <option value="Furrow / Flood Irrigation">Furrow / Flood Irrigation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Crop</label>
+              <select id="irrigCrop" class="form-control" onchange="calculateIrrigationGuidance()">
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Onion">Onion</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Gram">Gram / Chickpea</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="irrigRecommendationBox" style="margin-top:14px">
+            <!-- Calculated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 6: WEATHER & AGROMET
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-weather">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">🌤️ Weather-Aware Farming & Agromet Advisories</div>
+            <div class="mh-sub">Live meteorological data from Open-Meteo with IMD Agromet decision algorithms for spraying windows and irrigation.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="weatherDistrictSelect" class="form-control" style="min-width:180px" onchange="loadDistrictWeather(this.value)">
+              <option value="Pune">Pune</option>
+              <option value="Nashik">Nashik</option>
+              <option value="Nagpur">Nagpur</option>
+              <option value="Chhatrapati Sambhajinagar">Chhatrapati Sambhajinagar</option>
+              <option value="Ahmednagar">Ahmednagar</option>
+              <option value="Solapur">Solapur</option>
+              <option value="Kolhapur">Kolhapur</option>
+              <option value="Amravati">Amravati</option>
+              <option value="Latur">Latur</option>
+              <option value="Yavatmal">Yavatmal</option>
+              <option value="Jalgaon">Jalgaon</option>
+              <option value="Satara">Satara</option>
+              <option value="Sangli">Sangli</option>
+            </select>
+            <button class="btn-outline" onclick="loadDistrictWeather(document.getElementById('weatherDistrictSelect').value)">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div id="weatherContentArea">
+          <!-- Populated via API -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 7: MANDI MARKET PRICES
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-mandi">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">🏪 APMC Mandi Market Prices</div>
+            <div class="mh-sub">Observed wholesale rates from official Agmarknet and Maharashtra State Agricultural Marketing Board (MSAMB).</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="mandiCommodityFilter" class="form-control" style="max-width:180px" placeholder="Search Crop (e.g. Onion)" oninput="filterMandiTable()"/>
+            <button class="btn-outline" onclick="loadMandiPrices()">🔄 Reload Prices</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:10px 14px;background:#fffbeb;border-color:#fde68a;font-size:11.5px;color:#92400e;">
+          📌 <strong>Important Notice:</strong> Rates shown are observed APMC mandi wholesale records. Prices vary daily based on arrivals, moisture, and grading. Not guaranteed future prices.
+        </div>
+
+        <div class="mandi-table-wrap">
+          <table class="mandi-table">
+            <thead>
+              <tr>
+                <th>Crop / Commodity</th>
+                <th>APMC Market</th>
+                <th>Unit</th>
+                <th>Min Price</th>
+                <th>Modal (Average)</th>
+                <th>Max Price</th>
+                <th>Trend</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="mandiTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 8: GOVERNMENT SCHEMES
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-schemes">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">🏛️ Verified Government Agricultural Schemes</div>
+            <div class="mh-sub">Direct Income Support, ₹1 Crop Insurance, MahaDBT equipment subsidies, and Kisan Credit Card facilities.</div>
+          </div>
+          <button class="btn-primary" onclick="openEligibilityModal()">
+            <span>📋</span> Check Your Eligibility
+          </button>
+        </div>
+
+        <div id="schemesListGrid" class="card-grid">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       PANEL 9: CROP PLANNING ASSISTANT
+  ═══════════════════════════════════ -->
+  <div class="panel" id="panel-planning">
+    <div class="module-scroll">
+      <div class="module-inner">
+        <div class="module-header">
+          <div>
+            <div class="mh-title">🗺️ Crop Planning & Seasonal Rotation Assistant</div>
+            <div class="mh-sub">Scientific crop rotations recommended by Maharashtra Department of Agriculture & MPKV Rahuri to break pest cycles and conserve soil.</div>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <h3>🌱 Rotation 1: Soybean – Chickpea (हरभरा)</h3>
+            <p><strong>Ideal Zone:</strong> Marathwada & Vidarbha (Medium to deep black soil).</p>
+            <p><strong>Why it works:</strong> Soybean matures in 90-100 days leaving residual nitrogen and moisture. Minimum-till Chickpea requires only 2-3 irrigations in winter.</p>
+            <div class="form-label">Trade-offs: Moderate water requirement, excellent soil fertility maintenance.</div>
+          </div>
+
+          <div class="card">
+            <h3>🌾 Rotation 2: Cotton + Pigeonpea (तूर) Intercropping</h3>
+            <p><strong>Ideal Zone:</strong> Khandesh & Vidarbha.</p>
+            <p><strong>Why it works:</strong> 6:1 or 8:1 row ratio. Deep tap root of Pigeonpea breaks soil hardpan and acts as biological buffer against pests.</p>
+            <div class="form-label">Trade-offs: Long duration, risk reduction against erratic monsoon.</div>
+          </div>
+
+          <div class="card">
+            <h3>💧 Rotation 3: Bajra – Mustard / Chickpea</h3>
+            <p><strong>Ideal Zone:</strong> Drought-prone zones (Ahmednagar, Solapur, Beed).</p>
+            <p><strong>Why it works:</strong> Requires minimal water, thrives in shallow soils (<30 cm), low investment cost.</p>
+            <div class="form-label">Trade-offs: Lower gross revenue but lowest climate risk.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════
+     MODALS
+═══════════════════════════════════ -->
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeProfileModal()">✕</button>
+    <h3 style="font-size:18px;font-weight:900;margin-bottom:6px">👤 Farmer Profile Settings</h3>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:16px">Your profile helps KrushiMitra AI give customized recommendations for your specific district and crops.</p>
+
+    <div class="form-group">
+      <label class="form-label">Farmer Name</label>
+      <input type="text" id="profName" class="form-control" value="Farmer Mitra"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">District (Maharashtra)</label>
+      <select id="profDistrict" class="form-control">
+        <option value="Pune">Pune</option>
+        <option value="Nashik">Nashik</option>
+        <option value="Nagpur">Nagpur</option>
+        <option value="Chhatrapati Sambhajinagar">Chhatrapati Sambhajinagar</option>
+        <option value="Ahmednagar">Ahmednagar</option>
+        <option value="Solapur">Solapur</option>
+        <option value="Kolhapur">Kolhapur</option>
+        <option value="Amravati">Amravati</option>
+        <option value="Latur">Latur</option>
+        <option value="Yavatmal">Yavatmal</option>
+        <option value="Jalgaon">Jalgaon</option>
+        <option value="Satara">Satara</option>
+        <option value="Sangli">Sangli</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Farm Size (Acres)</label>
+      <input type="text" id="profSize" class="form-control" value="3.5"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Primary Crops</label>
+      <input type="text" id="profCrops" class="form-control" value="Soybean, Onion, Cotton"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Irrigation System</label>
+      <select id="profIrrig" class="form-control">
+        <option value="Drip Irrigation">Drip Irrigation</option>
+        <option value="Sprinkler">Sprinkler</option>
+        <option value="Flood / Furrow">Flood / Furrow</option>
+        <option value="Rainfed (Non-irrigated)">Rainfed (Non-irrigated)</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn-primary" onclick="saveFarmerProfile()">Save Profile</button>
+      <button class="btn-outline" onclick="closeProfileModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Eligibility Checker Modal -->
+<div class="modal-overlay" id="eligibilityModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeEligibilityModal()">✕</button>
+    <h3 style="font-size:18px;font-weight:900;margin-bottom:6px">📋 Scheme Eligibility Assessment</h3>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px">Answer 4 simple questions to check eligibility for PM-KISAN, Namo Shetkari, and ₹1 PMFBY Crop Insurance.</p>
+
+    <div class="form-group">
+      <label class="form-label">1. Do you have land registered in your name (7/12 extract)?</label>
+      <select id="elSaatbaara" class="form-control">
+        <option value="true">Yes, 7/12 land record is available</option>
+        <option value="false">No, tenant or landless farmer</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">2. Total Agricultural Land Holding (Acres)</label>
+      <input type="number" id="elAcres" class="form-control" value="2.5" min="0" step="0.5"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">3. Did anyone in your household pay Income Tax last year?</label>
+      <select id="elTaxpayer" class="form-control">
+        <option value="false">No (Eligible category)</option>
+        <option value="true">Yes (Income Tax Payee)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">4. Have you completed Aadhaar e-KYC on PM-KISAN portal?</label>
+      <select id="elEkyc" class="form-control">
+        <option value="true">Yes, e-KYC completed with OTP or Biometric</option>
+        <option value="false">Not yet / Pending</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" onclick="runEligibilityEvaluation()" style="width:100%;justify-content:center;margin-top:10px">
+      Check My Eligibility Now
+    </button>
+
+    <div id="eligibilityResultsArea" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════
+     CLIENT APPLICATION LOGIC
+═══════════════════════════════════ -->
+<script>
+/* ── APP STATE ── */
+let currentLang = 'Marathi';
+let currentConversationId = null;
+let currentDistrict = 'Pune';
+let isVoiceRecording = false;
+let speechRecognition = null;
+let activeSpeakSession = null;
+let allMandiItems = [];
+
+// API Base URL (relative for same origin)
+const API_BASE = window.location.origin;
+
+/* ── LOCALIZED UI STRINGS ── */
+const I18N = {
+  Marathi: {
+    newChat: 'नवीन संभाषण',
+    servicesLabel: 'शेती सेवा',
+    tabChat: 'चॅट सल्लागार',
+    tabCropDoctor: 'पीक डॉक्टर',
+    tabFert: 'खत व्यवस्थापन',
+    tabIrrig: 'सिंचन सल्लागार',
+    tabWeather: 'हवामान व फवारणी',
+    tabMandi: 'बाजारभाव (मंडी)',
+    tabSchemes: 'शासकीय योजना',
+    tabPlan: 'पीक नियोजन',
+    recentLabel: 'अलीकडील संभाषणे',
+    wsTitle: 'स्वागत आहे <span>कृषीमित्र AI</span> मध्ये',
+    wsSub: '🙏 नमस्कार! मी तुमचा प्रगत AI शेती सल्लागार आहे. भारतीय कृषी संशोधन परिषद (ICAR) व कृषी विद्यापीठांच्या शिफारसींनुसार पिके, खते, कीड आणि योजनांविषयी अचूक मार्गदर्शन मिळवा.',
+    placeholder: 'पिके, पिवळी पाने, खत मात्रा, ठिबक सिंचन किंवा बाजारभावाबद्दल विचारा…',
+    connected: 'जोडलेले',
+    offline: 'ऑफलाईन मोड',
+    suggestions: [
+      {icon:'🌱', title:'सोयाबीन पिवळे पडणे', sub:'कारणे व सेंद्रिय/रासायनिक उपाय', q:'माझ्या सोयाबीनची पाने पिवळी पडत आहेत, काय कारण असू शकते आणि काय उपाय करावा?'},
+      {icon:'🐛', title:'कापसावरील बोंडअळी', sub:'गुलाबी बोंडअळी एकात्मिक नियंत्रण', q:'कापसावर गुलाबी बोंडअळीचा प्रादुर्भाव कसा ओळखावा आणि नियंत्रण कसे करावे?'},
+      {icon:'💧', title:'कांद्यासाठी ठिबक सिंचन', sub:'पाणी बचत आणि ड्रीपर स्वच्छता', q:'कांदा पिकासाठी ठिबक सिंचन किती वेळ चालवावे आणि ड्रीपर चोक झाल्यास काय करावे?'},
+      {icon:'🏛️', title:'नमो शेतकरी महासन्मान', sub:'१२ हजार रुपये वार्षिक अनुदान', q:'नमो शेतकरी महासन्मान निधी आणि पीएम किसान योजनेची पात्रता आणि कागदपत्रे काय आहेत?'}
+    ],
+    quickChips: [
+      {label:'🌿 सोयाबीन पिवळे का?', q:'सोयाबीनची पाने पिवळी पडत आहेत, काय उपाय करावा?'},
+      {label:'🐛 बोंडअळी नियंत्रण', q:'कापसावरील गुलाबी बोंडअळीसाठी सर्वोत्तम कीटकनाशक व उपाय कोणते?'},
+      {label:'🧪 गव्हाचे खत व्यवस्थापन', q:'गहू पेरणीवेळी आणि वाढीच्या अवस्थेत कोणती खते द्यावीत?'},
+      {label:'💧 ठिबक सिंचन वेळापत्रक', q:'भारी काळ्या जमिनीत ठिबक सिंचन किती वेळ चालवावे?'},
+      {label:'💰 आजचे कांदा भाव', q:'नाशिक आणि लासलगाव बाजार समितीत कांद्याला काय भाव मिळत आहे?'},
+      {label:'🏛️ ₹१ पीक विमा योजना', q:'महाराष्ट्रात १ रुपयात पीक विमा कसा काढायचा आणि अर्ज कसा करावा?'}
+    ]
+  },
+  Hindi: {
+    newChat: 'नई बातचीत',
+    servicesLabel: 'कृषि सेवाएं',
+    tabChat: 'चैट सलाहकार',
+    tabCropDoctor: 'क्रॉप डॉक्टर',
+    tabFert: 'उर्वरक सलाहकार',
+    tabIrrig: 'सिंचाई सलाहकार',
+    tabWeather: 'मौसम व छिड़काव',
+    tabMandi: 'मंडी भाव',
+    tabSchemes: 'सरकारी योजनाएं',
+    tabPlan: 'फसल चक्र',
+    recentLabel: 'हाल की बातचीत',
+    wsTitle: 'स्वागत है <span>कृषि-मित्र AI</span> में',
+    wsSub: '🙏 नमस्ते! मैं आपका प्रामाणिक AI कृषि सलाहकार हूँ। ICAR और कृषि विश्वविद्यालयों के अनुसार फसलों, कीट नियंत्रण, खाद और योजनाओं की सही जानकारी पाएं।',
+    placeholder: 'फसलों, पीली पत्तियां, खाद, ड्रिप सिंचाई या मंडी भाव के बारे में पूछें…',
+    connected: 'कनेक्टेड',
+    offline: 'ऑफ़लाइन मोड',
+    suggestions: [
+      {icon:'🌱', title:'सोयाबीन पीला पड़ना', sub:'कारण और जैविक/रासायनिक समाधान', q:'सोयाबीन की पत्तियां पीली पड़ रही हैं, क्या कारण हो सकता है और क्या उपाय करें?'},
+      {icon:'🐛', title:'कपास में गुलाबी सुंडी', sub:'पिंक बॉलवर्म एकीकृत प्रबंधन', q:'कपास में गुलाबी सुंडी की रोकथाम के लिए कौन सा उपाय सबसे अच्छा है?'},
+      {icon:'💧', title:'ड्रिप सिंचाई समय', sub:'पानी की बचत और ड्रिपर सफाई', q:'ड्रिप सिंचाई में पानी कब और कितनी देर देना चाहिए?'},
+      {icon:'🏛️', title:'पीएम किसान योजना', sub:'वार्षिक वित्तीय सहायता', q:'पीएम किसान सम्मान निधि के लिए पात्रता और आवेदन प्रक्रिया क्या है?'}
+    ],
+    quickChips: [
+      {label:'🌿 पत्तियां पीली क्यों?', q:'फसल की पत्तियां पीली क्यों पड़ रही हैं और क्या खाद डालें?'},
+      {label:'🐛 कीट नियंत्रण उपाय', q:'फसल में कीट लगने पर प्राथमिक जैविक और रासायनिक उपचार क्या है?'},
+      {label:'🧪 गेहूं की खाद', q:'गेहूं में कल्ले फूटते समय कौन सी खाद देनी चाहिए?'},
+      {label:'💧 ड्रिप सिंचाई टिप्स', q:'ड्रिप सिंचाई में चोकिंग रोकने के लिए एसिड ट्रीटमेंट कैसे करें?'},
+      {label:'💰 सोयाबीन मंडी भाव', q:'लातूर और अकोला मंडी में सोयाबीन के ताजा भाव क्या हैं?'},
+      {label:'🏛️ फसल बीमा ₹1', q:'प्रधानमंत्री फसल बीमा योजना में क्लेम कैसे दर्ज करें?'}
+    ]
+  },
+  English: {
+    newChat: 'New Conversation',
+    servicesLabel: 'Agricultural Services',
+    tabChat: 'Chat Advisor',
+    tabCropDoctor: 'Crop Doctor',
+    tabFert: 'Fertilizer Advisor',
+    tabIrrig: 'Irrigation Advisor',
+    tabWeather: 'Live Weather',
+    tabMandi: 'Mandi Prices',
+    tabSchemes: 'Govt Schemes',
+    tabPlan: 'Crop Planning',
+    recentLabel: 'Recent Chats',
+    wsTitle: 'Welcome to <span>KrushiMitra AI</span>',
+    wsSub: '🙏 Namaste! Your secure, evidence-backed agricultural advisor powered by ICAR, State Agricultural Universities (MPKV, PDKV, VNMKV), and Agromet advisories. Ask anything about crops, pests, fertilizers, or government schemes.',
+    placeholder: 'Ask about crops, yellow leaves, fertilizers, drip irrigation, or mandi prices…',
+    connected: 'Connected',
+    offline: 'Offline Mode',
+    suggestions: [
+      {icon:'🌱', title:'Soybean Yellow Leaves', sub:'Causes & organic/chemical remedies', q:'My soybean leaves are turning yellow, what could be the causes and practical remedy?'},
+      {icon:'🐛', title:'Pink Bollworm in Cotton', sub:'Integrated pest threshold & spray', q:'How to detect and control pink bollworm in cotton crop according to ICAR?'},
+      {icon:'💧', title:'Drip Irrigation Schedule', sub:'Water budgeting & acid flushing', q:'What is the optimal drip irrigation schedule for black clay soil and how to clean clogged drippers?'},
+      {icon:'🏛️', title:'PM-KISAN & PMFBY', sub:'Eligibility & ₹1 insurance guide', q:'What are the eligibility requirements for PM-KISAN and PM Fasal Bima Yojana in Maharashtra?'}
+    ],
+    quickChips: [
+      {label:'🌿 Why Yellow Leaves?', q:'Why are crop leaves turning yellow and what is the immediate safe action?'},
+      {label:'🐛 Bollworm Control', q:'What is the recommended chemical and organic spray for cotton bollworm?'},
+      {label:'🧪 Wheat Fertilizer Dose', q:'What is the balanced NPK and biofertilizer dose for wheat crop?'},
+      {label:'💧 Drip Flushing Guide', q:'How to perform hydrochloric acid flushing for clogged drip laterals?'},
+      {label:'💰 Lasalgaon Onion Price', q:'What are the current mandi modal prices for onion in Lasalgaon and Nashik?'},
+      {label:'🏛️ MahaDBT Subsidies', q:'How to apply for tractor and drip irrigation subsidy on MahaDBT portal?'}
+    ]
+  }
+};
+
+/* ── DOM READY INITIALIZATION ── */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load saved language and profile from localStorage if present
+  try {
+    const savedLang = localStorage.getItem('km_lang');
+    if (savedLang) {
+      currentLang = savedLang;
+      document.getElementById('langSel').value = currentLang;
+    }
+  } catch(e){}
+
+  applyLanguageUI(currentLang);
+  await checkHealthAndConnectivity();
+  await loadFarmerProfile();
+  await loadRecentConversations();
+  loadDistrictWeather(currentDistrict);
+  loadMandiPrices();
+  loadSchemesList();
+  calculateFertilizerGuidance();
+  calculateIrrigationGuidance();
+});
+
+/* ── HEALTH CHECK ── */
+async function checkHealthAndConnectivity() {
+  const connDot = document.querySelector('.conn-dot');
+  const connText = document.getElementById('connStatusText');
+  const banner = document.getElementById('offlineBanner');
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, { method: 'GET', signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      connDot.style.background = 'var(--g4)';
+      connText.textContent = (I18N[currentLang] || I18N.English).connected;
+      banner.style.display = 'none';
+      return true;
+    }
+  } catch(e) {}
+
+  connDot.style.background = 'var(--amber)';
+  connText.textContent = (I18N[currentLang] || I18N.English).offline;
+  banner.style.display = 'flex';
+  return false;
+}
+
+/* ── PANEL SWITCHING ── */
+function switchPanel(panelName) {
+  if (panelName === 'pest') {
+    panelName = 'cropdoctor';
+  }
+
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('panel-' + panelName);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.sb-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.getElementById('stab-' + panelName);
+  if (activeTab) activeTab.classList.add('active');
+
+  const curLabel = document.getElementById('topbarCur');
+  const tabText = activeTab ? activeTab.innerText.trim() : panelName;
+  curLabel.textContent = tabText;
+
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  if (panelName === 'cropdoctor') {
+    if (!cdState.mode) showCdScreen('home');
+    setCdLang(currentLang || 'Marathi');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── MULTILINGUAL ADAPTATION ── */
+function changeLanguage(lang) {
+  currentLang = lang;
+  try { localStorage.setItem('km_lang', lang); } catch(e){}
+  applyLanguageUI(lang);
+  showToast(`🌐 Language set to ${lang}`);
+}
+
+function applyLanguageUI(lang) {
+  if (typeof setCdLang === 'function') {
+    setCdLang(lang);
+  }
+  const dict = I18N[lang] || I18N.English;
+
+  // Sidebar labels
+  document.getElementById('uiNewChat').textContent = dict.newChat;
+  document.getElementById('uiToolsLabel').textContent = dict.servicesLabel;
+  document.getElementById('uiRecentLabel').textContent = dict.recentLabel;
+
+  document.getElementById('uiTabChat').textContent = dict.tabChat;
+  document.getElementById('uiTabCropDoctor').textContent = dict.tabCropDoctor;
+  document.getElementById('uiTabFert').textContent = dict.tabFert;
+  document.getElementById('uiTabIrrig').textContent = dict.tabIrrig;
+  document.getElementById('uiTabWeather').textContent = dict.tabWeather;
+  document.getElementById('uiTabMandi').textContent = dict.tabMandi;
+  document.getElementById('uiTabSchemes').textContent = dict.tabSchemes;
+  document.getElementById('uiTabPlan').textContent = dict.tabPlan;
+
+  // Welcome screen
+  document.getElementById('wsTitle').innerHTML = dict.wsTitle;
+  document.getElementById('wsSub').textContent = dict.wsSub;
+  document.getElementById('userInput').placeholder = dict.placeholder;
+
+  // Suggestions grid
+  const sgGrid = document.getElementById('sgGrid');
+  sgGrid.innerHTML = dict.suggestions.map(s => `
+    <div class="sg-card" onclick="quickAsk(${JSON.stringify(s.q)})">
+      <div class="sg-top"><span class="sg-icon">${s.icon}</span><span class="sg-arrow">→</span></div>
+      <div class="sg-title">${s.title}</div>
+      <div class="sg-sub">${s.sub}</div>
+    </div>
+  `).join('');
+
+  // Quick chips
+  const quickRow = document.getElementById('quickRow');
+  quickRow.innerHTML = dict.quickChips.map(c => `
+    <button class="qbtn" onclick="quickAsk(${JSON.stringify(c.q)})">${c.label}</button>
+  `).join('');
+}
+
+/* ── CONVERSATION MANAGEMENT ── */
+async function loadRecentConversations() {
+  const list = document.getElementById('recentChatsList');
+  try {
+    const res = await fetch(`${API_BASE}/api/conversations`);
+    if (res.ok) {
+      const convs = await res.json();
+      if (!convs.length) {
+        list.innerHTML = `<div style="padding:14px 10px;font-size:12px;color:var(--text-muted);text-align:center;">🌱 No chats yet. Start asking your farming questions!</div>`;
+        return;
+      }
+      list.innerHTML = convs.map(c => `
+        <div class="sb-hist-item" onclick="loadConversationDetail('${c.id}')">
+          <span class="sb-hist-title">🌾 ${escapeHtml(c.title)}</span>
+          <button class="sb-hist-del" onclick="event.stopPropagation();deleteConversation('${c.id}')" title="Delete conversation">✕</button>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    list.innerHTML = `<div style="padding:14px 10px;font-size:12px;color:var(--text-muted);text-align:center;">🌱 Offline history mode</div>`;
+  }
+}
+
+async function startNewConversation() {
+  currentConversationId = null;
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = `
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="ws-glow">🌾</div>
+      <div class="ws-title">${(I18N[currentLang]||I18N.English).wsTitle}</div>
+      <div class="ws-sub">${(I18N[currentLang]||I18N.English).wsSub}</div>
+      <div class="sg-grid" id="sgGrid"></div>
+    </div>
+  `;
+  applyLanguageUI(currentLang);
+  switchPanel('chat');
+  showToast('🆕 Started new conversation');
+}
+
+async function loadConversationDetail(convId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/conversations/${convId}`);
+    if (res.ok) {
+      const data = await res.json();
+      currentConversationId = data.id;
+      const msgs = document.getElementById('messages');
+      msgs.innerHTML = '';
+      data.messages.forEach(m => {
+        appendMessageBubble(m.role, m.content, m.sources || []);
+      });
+      switchPanel('chat');
+    }
+  } catch(e) {
+    showToast('Failed to load conversation');
+  }
+}
+
+async function deleteConversation(convId) {
+  if (!confirm('Are you sure you want to delete this conversation?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/conversations/${convId}`, { method: 'DELETE' });
+    if (res.ok) {
+      if (currentConversationId === convId) startNewConversation();
+      await loadRecentConversations();
+      showToast('Conversation deleted');
+    }
+  } catch(e) {
+    showToast('Could not delete conversation');
+  }
+}
+
+/* ── CHAT SEND & RECEIVE ── */
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+}
+
+function quickAsk(q) {
+  document.getElementById('userInput').value = q;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('userInput');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+
+  // Remove welcome screen if visible
+  const ws = document.getElementById('welcomeScreen');
+  if (ws) ws.remove();
+
+  appendMessageBubble('user', text);
+  showTypingIndicator();
+
+  try {
+    const payload = {
+      message: text,
+      conversation_id: currentConversationId,
+      language: currentLang,
+      district: currentDistrict
+    };
+
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    removeTypingIndicator();
+
+    if (res.ok) {
+      const data = await res.json();
+      currentConversationId = data.conversation_id;
+      appendMessageBubble('bot', data.message, data.sources || []);
+      loadRecentConversations();
+    } else {
+      appendMessageBubble('bot', '⚠️ Server returned an error. Please try again or check backend service.');
+    }
+  } catch(e) {
+    removeTypingIndicator();
+    appendMessageBubble('bot', `⚠️ Connectivity Error: ${e.message}. Operating in offline agricultural heuristic mode.`);
+  }
+
+  sendBtn.disabled = false;
+}
+
+function appendMessageBubble(role, text, sources = []) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (role === 'user' ? 'user' : '');
+
+  const av = document.createElement('div');
+  av.className = 'av ' + (role === 'user' ? 'usr' : 'bot');
+  av.textContent = role === 'user' ? '👨‍🌾' : '🌾';
+
+  const bw = document.createElement('div');
+  bw.className = 'bubble-wrap';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (role === 'user' ? 'usr' : 'bot');
+
+  const contentSpan = document.createElement('div');
+  contentSpan.innerHTML = formatMarkdown(text);
+  bubble.appendChild(contentSpan);
+
+  // Render verified RAG source pills if available
+  if (sources && sources.length > 0) {
+    const spDiv = document.createElement('div');
+    spDiv.className = 'source-pills';
+    spDiv.innerHTML = '<span style="font-size:10px;font-weight:700;color:var(--text3);width:100%;margin-bottom:2px">📚 VERIFIED AGRICULTURAL SOURCES:</span>' +
+      sources.map(s => `
+        <a href="${s.source_url || '#'}" target="_blank" rel="noopener" class="source-pill">
+          ✓ ${escapeHtml(s.source_name)} ${s.publication_date ? '(' + s.publication_date + ')' : ''} ↗
+        </a>
+      `).join('');
+    bubble.appendChild(spDiv);
+  }
+
+  bw.appendChild(bubble);
+
+  // Bot action buttons (Listen TTS)
+  if (role === 'bot') {
+    const meta = document.createElement('div');
+    meta.className = 'bubble-meta';
+    const listenBtn = document.createElement('button');
+    listenBtn.className = 'bm-btn';
+    listenBtn.innerHTML = '🔊 Listen';
+    listenBtn.onclick = () => speakText(text, listenBtn);
+    meta.appendChild(listenBtn);
+    bw.appendChild(meta);
+  }
+
+  wrap.appendChild(av);
+  wrap.appendChild(bw);
+  msgs.appendChild(wrap);
+
+  const wrapScroll = document.getElementById('messagesWrap');
+  wrapScroll.scrollTop = wrapScroll.scrollHeight;
+}
+
+function showTypingIndicator() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.id = 'typingIndicator';
+  d.className = 'typing-wrap';
+  d.innerHTML = `
+    <div class="av bot">🌾</div>
+    <div class="typing-bbl">
+      <div class="td"></div><div class="td"></div><div class="td"></div>
+    </div>
+  `;
+  msgs.appendChild(d);
+  document.getElementById('messagesWrap').scrollTop = 99999;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SIMPLIFIED, VOICE-FIRST & PICTURE-BASED CROP DOCTOR LOGIC
+══════════════════════════════════════════════════════════════ */
+const CD_TEXTS = {
+  Marathi: {
+    heading: "तुमच्या पिकाला काय झाले आहे ते सांगा",
+    subheading: "फोटो काढा, आवाजाने बोला किंवा खाली चित्रावरून समस्या निवडा. टायपिंगची गरज नाही.",
+    heroPhotoTitle: "फोटो काढा",
+    heroPhotoSub: "कॅमेरा किंवा फोटोवरून पानांचे त्वरित अचूक निदान",
+    heroUploadTitle: "फोटो अपलोड करा",
+    heroUploadSub: "गॅलरीतून पाने, खोड किंवा किडीचे १ किंवा अधिक फोटो निवडा",
+    heroVoiceTitle: "बोलून सांगा",
+    heroVoiceSub: "मराठीत बोला, आमची सिस्टीम समजून उपाय देईल",
+    heroProbTitle: "समस्या निवडा",
+    heroProbSub: "पिवळी पाने, कीड, वाळणे यांसारखी लक्षणे निवडा",
+    voiceHeader: "🎤 बोलून सांगा",
+    voiceStatusIdle: "मायक्रोफोनवर टॅप करा आणि बोला",
+    voiceStatusListening: "🔴 ऐकत आहे... बोला...",
+    voiceHint: "उदा. 'माझ्या कापसाची पाने पिवळी पडत आहेत.'",
+    voiceReadText: "🔊 उच्चार ऐका",
+    voiceSubmitText: "✓ बरोबर आहे, तपासणी करा",
+    voiceRetryText: "🔄 पुन्हा बोला",
+    voiceBack: "मागे",
+    cropHeader: "हे कोणते पीक आहे?",
+    cropSub: "खालील चित्रावरून तुमचे पीक निवडा:",
+    cropSkip: "मला खात्री नाही / पुढे जा ➔",
+    probHeader: "पानांवर किंवा पिकावर काय दिसते?",
+    probSub: "खालील चित्रावरून लक्षण निवडा:",
+    probYellow: "पिवळी पाने",
+    probPest: "अळी किंवा कीड",
+    probWilt: "वाळणे किंवा सुकणे",
+    probSpot: "ठिपके किंवा करपा",
+    probRot: "फळ/बोंड सडणे",
+    probOther: "इतर समस्या",
+    photoHeader: "📸 फोटो तपासणी व निदान",
+    photoAnalyzeBtn: "पिकाची तपासणी करा (AI Vision)",
+    photoRetakeBtn: "दुसरा फोटो काढा",
+    photoAddMoreBtn: "अजून फोटो जोडा",
+    photoClearBtn: "फोटो रद्द करा",
+    photoChangeCropBtn: "पीक बदला",
+    photoCropLabel: "पीक:",
+    photoNotesLbl: "📝 पर्यायी: पानांवरील लक्षणे किंवा माहिती लिहा (उदा. काळे ठिपके):",
+    quickTextPlaceholder: "किंवा पिकाची समस्या इथे टाईप करा (उदा. टोमॅटो पानांवर काळे ठिपके)...",
+    quickTextBtn: "सल्ला घ्या",
+    photoBack: "मागे",
+    fuSkip: "माहित नाही / पुढे जा ➔",
+    loadingTitle: "पिकाच्या समस्येचे विश्लेषण करत आहे...",
+    loadingSub: "कृषी विद्यापीठ व ICAR शिफारसींनुसार उपाय शोधत आहे",
+    resultTag: "कृषी सल्ला अहवाल",
+    lblNoticed: "आम्हाला काय दिसले:",
+    lblReason: "संभाव्य कारण:",
+    lblActions: "आता काय करावे:",
+    lblAvoid: "काय टाळावे:",
+    lblHelp: "अधिक मदत हवी आहे?",
+    listenBtn: "🔊 संपूर्ण सल्ला ऐका",
+    listenBtnStop: "⏹️ आवाज बंद करा",
+    askAnother: "❓ नवीन तपासणी करा",
+    continueChat: "💬 चॅटमध्ये अधिक चर्चा करा",
+    kisanSub: "कृषी शास्त्रज्ञांशी थेट बोला (सकाळी ६ ते रात्री १०)"
+  },
+  Hindi: {
+    heading: "बताएं आपकी फसल को क्या हुआ है",
+    subheading: "फोटो लें, बोलकर बताएं या नीचे चित्र से समस्या चुनें। टाइपिंग की जरूरत नहीं।",
+    heroPhotoTitle: "फोटो लें",
+    heroPhotoSub: "कैमरा या फोटो से पत्तियों की त्वरित जांच",
+    heroUploadTitle: "फोटो अपलोड करें",
+    heroUploadSub: "गैलरी से पत्तियों या कीट के १ या अधिक फोटो चुनें",
+    heroVoiceTitle: "बोलकर बताएं",
+    heroVoiceSub: "हिंदी में बोलें, बिना टाइपिंग आसान मार्गदर्शन",
+    heroProbTitle: "समस्या चुनें",
+    heroProbSub: "पीली पत्तियां, कीट, सूखना जैसे लक्षण चुनें",
+    voiceHeader: "🎤 बोलकर बताएं",
+    voiceStatusIdle: "माइक पर टैप करें और बोलें",
+    voiceStatusListening: "🔴 सुन रहे हैं... बोलिए...",
+    voiceHint: "जैसे 'मेरी कपास की पत्तियां पीली पड़ रही हैं।'",
+    voiceReadText: "🔊 सुनें क्या सुना गया",
+    voiceSubmitText: "✓ ठीक है, जांच करें",
+    voiceRetryText: "🔄 फिर से बोलें",
+    voiceBack: "वापस",
+    cropHeader: "यह कौन सी फसल है?",
+    cropSub: "नीचे चित्रों में से अपनी फसल चुनें:",
+    cropSkip: "पता नहीं / आगे बढ़ें ➔",
+    probHeader: "फसल पर क्या लक्षण दिख रहे हैं?",
+    probSub: "नीचे चित्रों में से समस्या चुनें:",
+    probYellow: "पीली पत्तियां",
+    probPest: "कीट या सुंडी",
+    probWilt: "सूखना या मुरझाना",
+    probSpot: "धब्बे या झुलसा",
+    probRot: "फल या गूलर सड़न",
+    probOther: "अन्य समस्या",
+    photoHeader: "📸 फोटो जांच व निदान",
+    photoAnalyzeBtn: "फसल की जांच करें (AI Vision)",
+    photoRetakeBtn: "दूसरा फोटो लें",
+    photoAddMoreBtn: "और फोटो जोड़ें",
+    photoClearBtn: "फोटो हटाएं",
+    photoChangeCropBtn: "फसल बदलें",
+    photoCropLabel: "फसल:",
+    photoNotesLbl: "📝 वैकल्पिक: लक्षणों का विवरण लिखें (उदा. काले धब्बे):",
+    quickTextPlaceholder: "या फसल की समस्या यहाँ लिखें (उदा. टमाटर पर काले धब्बे)...",
+    quickTextBtn: "सलाह लें",
+    photoBack: "वापस",
+    fuSkip: "पता नहीं / आगे बढ़ें ➔",
+    loadingTitle: "फसल की समस्या की जांच हो रही है...",
+    loadingSub: "कृषि विश्वविद्यालय व ICAR दिशा-निर्देशों से मिलान हो रहा है",
+    resultTag: "कृषि परामर्श रिपोर्ट",
+    lblNoticed: "हमने क्या देखा:",
+    lblReason: "संभावित कारण:",
+    lblActions: "अभी क्या करें:",
+    lblAvoid: "क्या न करें:",
+    lblHelp: "अधिक सहायता चाहिए?",
+    listenBtn: "🔊 पूरी सलाह सुनें",
+    listenBtnStop: "⏹️ आवाज रोकें",
+    askAnother: "❓ नया सवाल पूछें",
+    continueChat: "💬 चैट में बात करें",
+    kisanSub: "कृषि वैज्ञानिकों से सीधे बात करें (सुबह 6 से रात 10)"
+  },
+  English: {
+    heading: "Tell us what is wrong with your crop",
+    subheading: "Take a photo, upload images, speak your problem, or tap a picture option below. No typing needed.",
+    heroPhotoTitle: "Take a Photo",
+    heroPhotoSub: "Open camera or upload crop leaf photo for instant visual AI diagnosis",
+    heroUploadTitle: "Upload Photos",
+    heroUploadSub: "Select 1 or more leaf or pest photos from phone gallery or files",
+    heroVoiceTitle: "Speak Your Problem",
+    heroVoiceSub: "Describe symptoms in Marathi, Hindi, or English without typing",
+    heroProbTitle: "Select a Problem",
+    heroProbSub: "Choose from picture cards (Yellow leaves, Insects, Wilting, Spots...)",
+    voiceHeader: "🎤 Speak Your Problem",
+    voiceStatusIdle: "Tap microphone and speak naturally",
+    voiceStatusListening: "🔴 Listening... Speak now...",
+    voiceHint: "e.g. 'My cotton leaves are turning yellow.'",
+    voiceReadText: "🔊 Listen What Was Heard",
+    voiceSubmitText: "✓ Looks Good, Analyze",
+    voiceRetryText: "🔄 Speak Again",
+    voiceBack: "Back",
+    cropHeader: "Which crop is this?",
+    cropSub: "Tap your crop from the picture cards below:",
+    cropSkip: "Skip / Not Sure ➔",
+    probHeader: "What problem do you see?",
+    probSub: "Choose from picture cards:",
+    probYellow: "Yellow Leaves",
+    probPest: "Insects / Worms",
+    probWilt: "Wilting / Drying",
+    probSpot: "Leaf Spots / Blight",
+    probRot: "Rotten Fruit / Bolls",
+    probOther: "Other Problem",
+    photoHeader: "📸 Photo Preview & Analysis",
+    photoAnalyzeBtn: "Analyze with Crop Doctor AI",
+    photoRetakeBtn: "Retake Photo",
+    photoAddMoreBtn: "Add More Photos",
+    photoClearBtn: "Clear Photos",
+    photoChangeCropBtn: "Change Crop",
+    photoCropLabel: "Crop:",
+    photoNotesLbl: "📝 Optional: Describe symptoms (e.g. curling leaves, black spots):",
+    quickTextPlaceholder: "Or type your crop problem / symptoms here (optional)...",
+    quickTextBtn: "Diagnose",
+    photoBack: "Back",
+    fuSkip: "Not Sure / Skip ➔",
+    loadingTitle: "Analyzing your crop problem...",
+    loadingSub: "Evaluating symptoms against university guidelines & ICAR advisories",
+    resultTag: "Diagnostic Assessment",
+    lblNoticed: "What we noticed:",
+    lblReason: "Possible reason:",
+    lblActions: "What you can do now:",
+    lblAvoid: "What to avoid:",
+    lblHelp: "Need more help?",
+    listenBtn: "🔊 Listen Complete Advice",
+    listenBtnStop: "⏹️ Stop Audio",
+    askAnother: "❓ Ask Another Question",
+    continueChat: "💬 Continue in Chat Advisor",
+    kisanSub: "Speak directly with agricultural scientists (6 AM to 10 PM)"
+  }
+};
+
+let cdState = {
+  lang: 'Marathi',
+  mode: null,
+  crop: null,
+  problem_type: null,
+  query: null,
+  plant_part: null,
+  spread: null,
+  timeline: null,
+  image_b64: null,
+  images: [],
+  lastDiagnosis: null,
+  isRecording: false,
+  isSpeaking: false,
+  recognition: null
+};
+
+function setCdLang(l) {
+  cdState.lang = l;
+  document.getElementById('cdLangMr').classList.toggle('active', l === 'Marathi');
+  document.getElementById('cdLangHi').classList.toggle('active', l === 'Hindi');
+  document.getElementById('cdLangEn').classList.toggle('active', l === 'English');
+
+  const dict = CD_TEXTS[l] || CD_TEXTS.English;
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+
+  setTxt('cdHeading', dict.heading);
+  setTxt('cdSubheading', dict.subheading);
+  setTxt('cdHeroPhotoTitle', dict.heroPhotoTitle);
+  setTxt('cdHeroPhotoSub', dict.heroPhotoSub);
+  setTxt('cdHeroUploadTitle', dict.heroUploadTitle);
+  setTxt('cdHeroUploadSub', dict.heroUploadSub);
+  setTxt('cdHeroVoiceTitle', dict.heroVoiceTitle);
+  setTxt('cdHeroVoiceSub', dict.heroVoiceSub);
+  setTxt('cdHeroProbTitle', dict.heroProbTitle);
+  setTxt('cdHeroProbSub', dict.heroProbSub);
+
+  setTxt('cdVoiceHeader', dict.voiceHeader);
+  setTxt('cdVoiceStatus', cdState.isRecording ? dict.voiceStatusListening : dict.voiceStatusIdle);
+  setTxt('cdVoiceHint', dict.voiceHint);
+  setTxt('cdVoiceReadText', dict.voiceReadText);
+  setTxt('cdVoiceSubmitText', dict.voiceSubmitText);
+  setTxt('cdVoiceRetryText', dict.voiceRetryText);
+  setTxt('cdVoiceBack', dict.voiceBack);
+
+  setTxt('cdCropHeader', dict.cropHeader);
+  setTxt('cdCropSub', dict.cropSub);
+  setTxt('cdCropSkip', dict.cropSkip);
+
+  setTxt('cdProbHeader', dict.probHeader);
+  setTxt('cdProbSub', dict.probSub);
+  setTxt('cdProbYellow', dict.probYellow);
+  setTxt('cdProbPest', dict.probPest);
+  setTxt('cdProbWilt', dict.probWilt);
+  setTxt('cdProbSpot', dict.probSpot);
+  setTxt('cdProbRot', dict.probRot);
+  setTxt('cdProbOther', dict.probOther);
+
+  setTxt('cdPhotoHeader', dict.photoHeader);
+  setTxt('cdPhotoAnalyzeBtn', dict.photoAnalyzeBtn);
+  setTxt('cdPhotoRetakeBtn', dict.photoRetakeBtn);
+  setTxt('cdPhotoAddMoreBtn', dict.photoAddMoreBtn);
+  setTxt('cdPhotoClearBtn', dict.photoClearBtn);
+  setTxt('cdPhotoChangeCropBtn', dict.photoChangeCropBtn);
+  setTxt('cdPhotoCropLabel', dict.photoCropLabel);
+  setTxt('cdPhotoNotesLbl', dict.photoNotesLbl);
+  setTxt('cdQuickTextBtn', dict.quickTextBtn);
+  const qInput = document.getElementById('cdQuickTextInput');
+  if (qInput && dict.quickTextPlaceholder) qInput.placeholder = dict.quickTextPlaceholder;
+  setTxt('cdPhotoBack', dict.photoBack);
+
+  setTxt('cdFuSkip', dict.fuSkip);
+  setTxt('cdLoadingTitle', dict.loadingTitle);
+  setTxt('cdLoadingSub', dict.loadingSub);
+  setTxt('cdResultTag', dict.resultTag);
+  setTxt('cdLblNoticed', dict.lblNoticed);
+  setTxt('cdLblReason', dict.lblReason);
+  setTxt('cdLblActions', dict.lblActions);
+  setTxt('cdLblAvoid', dict.lblAvoid);
+  setTxt('cdLblHelp', dict.lblHelp);
+  setTxt('cdListenBtnText', cdState.isSpeaking ? dict.listenBtnStop : dict.listenBtn);
+  setTxt('cdAskAnother', dict.askAnother);
+  setTxt('cdContinueChat', dict.continueChat);
+  setTxt('cdKisanSub', dict.kisanSub);
+
+  // Sync with main topbar language if needed
+  if (currentLang !== l) {
+    currentLang = l;
+    const lSel = document.getElementById('langSel');
+    if (lSel) lSel.value = l;
+  }
+}
+
+function showCdScreen(screenName) {
+  const screens = ['home', 'voice', 'crop', 'problem', 'photo', 'followup', 'result'];
+  screens.forEach(s => {
+    const el = document.getElementById('cdScreen' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (el) el.style.display = (s === screenName) ? 'block' : 'none';
+  });
+
+  if (screenName === 'home') {
+    // Reset state for new consultation
+    cdState.mode = null;
+    cdState.crop = null;
+    cdState.problem_type = null;
+    cdState.query = null;
+    cdState.plant_part = null;
+    cdState.spread = null;
+    cdState.timeline = null;
+    cdState.image_b64 = null;
+    cdState.images = [];
+    const notes = document.getElementById('cdPhotoNotes');
+    if (notes) notes.value = '';
+    const qInput = document.getElementById('cdQuickTextInput');
+    if (qInput) qInput.value = '';
+    stopCdVoiceRecording();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    cdState.isSpeaking = false;
+  }
+}
+
+/* ── VOICE SCREEN CONTROLS ── */
+function startCdVoiceScreen() {
+  cdState.mode = 'voice';
+  showCdScreen('voice');
+  resetCdVoice();
+  // Prompt user to tap microphone
+}
+
+function resetCdVoice() {
+  stopCdVoiceRecording();
+  cdState.query = null;
+  const box = document.getElementById('cdVoiceTranscriptBox');
+  if (box) box.textContent = '';
+  document.getElementById('cdVoiceReadAloudBtn').style.display = 'none';
+  document.getElementById('cdVoiceSubmitBtn').style.display = 'none';
+  document.getElementById('cdVoiceRetryBtn').style.display = 'none';
+  document.getElementById('cdVoiceStatus').textContent = CD_TEXTS[cdState.lang].voiceStatusIdle;
+}
+
+function toggleCdVoiceRecording() {
+  if (cdState.isRecording) {
+    stopCdVoiceRecording();
+  } else {
+    startCdVoiceRecording();
+  }
+}
+
+function startCdVoiceRecording() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    showToast("Speech recognition is not supported in this browser. Please tap Select a Problem or Take a Photo.");
+    return;
+  }
+
+  try {
+    cdState.recognition = new SpeechRec();
+    cdState.recognition.continuous = false;
+    cdState.recognition.interimResults = true;
+
+    if (cdState.lang === 'Marathi') cdState.recognition.lang = 'mr-IN';
+    else if (cdState.lang === 'Hindi') cdState.recognition.lang = 'hi-IN';
+    else cdState.recognition.lang = 'en-IN';
+
+    const micBtn = document.getElementById('cdVoiceMicBtn');
+    const statusText = document.getElementById('cdVoiceStatus');
+    const transcriptBox = document.getElementById('cdVoiceTranscriptBox');
+    transcriptBox.textContent = '';
+
+    cdState.recognition.onstart = () => {
+      cdState.isRecording = true;
+      micBtn.classList.add('listening');
+      document.getElementById('cdVoiceMicIcon').textContent = '🔴';
+      statusText.textContent = CD_TEXTS[cdState.lang].voiceStatusListening;
+    };
+
+    cdState.recognition.onresult = (e) => {
+      let text = '';
+      for (let i = e.resultIndex; i < e.results.length; ++i) {
+        text += e.results[i][0].transcript;
+      }
+      transcriptBox.textContent = text;
+      cdState.query = text;
+    };
+
+    cdState.recognition.onerror = (e) => {
+      console.warn("Speech recognition error:", e);
+      stopCdVoiceRecording();
+      if (e.error === 'not-allowed') {
+        showToast("Microphone access blocked. Please allow microphone or choose a picture option.");
+      }
+    };
+
+    cdState.recognition.onend = () => {
+      stopCdVoiceRecording();
+      if (cdState.query && cdState.query.trim()) {
+        document.getElementById('cdVoiceReadAloudBtn').style.display = 'inline-flex';
+        document.getElementById('cdVoiceSubmitBtn').style.display = 'inline-flex';
+        document.getElementById('cdVoiceRetryBtn').style.display = 'inline-flex';
+        statusText.textContent = "✓ Recognized! Tap 'Looks Good' or 'Speak Again'.";
+      }
+    };
+
+    cdState.recognition.start();
+  } catch (err) {
+    console.error("Speech start error:", err);
+    showToast("Could not start microphone: " + err.message);
+    stopCdVoiceRecording();
+  }
+}
+
+function stopCdVoiceRecording() {
+  cdState.isRecording = false;
+  const micBtn = document.getElementById('cdVoiceMicBtn');
+  if (micBtn) micBtn.classList.remove('listening');
+  const micIcon = document.getElementById('cdVoiceMicIcon');
+  if (micIcon) micIcon.textContent = '🎤';
+  if (cdState.recognition) {
+    try { cdState.recognition.stop(); } catch(e){}
+    cdState.recognition = null;
+  }
+}
+
+function readAloudCdVoice() {
+  if (!cdState.query) return;
+  speakText(cdState.query);
+}
+
+async function confirmAndSubmitCdVoice() {
+  if (!cdState.query) return;
+
+  // Auto-detect crop from voice query
+  const qLower = cdState.query.toLowerCase();
+  const cropMap = {
+    'Cotton': ['कापूस', 'कापसा', 'कपास', 'cotton', 'kapas'],
+    'Soybean': ['सोयाबीन', 'सोया', 'soybean', 'soya'],
+    'Tomato': ['टोमॅटो', 'टमाटर', 'tomato'],
+    'Onion': ['कांदा', 'कांद्या', 'प्याज', 'onion', 'pyaz'],
+    'Sugarcane': ['ऊस', 'उसा', 'गन्ना', 'sugarcane'],
+    'Wheat': ['गहू', 'गव्हा', 'गेहूं', 'wheat']
+  };
+
+  let detectedCrop = null;
+  for (const [cName, syns] of Object.entries(cropMap)) {
+    if (syns.some(s => qLower.includes(s))) {
+      detectedCrop = cName;
+      break;
+    }
+  }
+
+  if (detectedCrop) {
+    cdState.crop = detectedCrop;
+    await checkFollowUpOrExecuteDiagnosis();
+  } else {
+    // Crop not clear from speech -> Show Picture Crop Selector
+    showCdScreen('crop');
+  }
+}
+
+/* ── PICTURE CROP SELECTOR ── */
+function handleCdBackFromCrop() {
+  if (cdState.mode === 'voice') showCdScreen('voice');
+  else if (cdState.mode === 'problem') showCdScreen('problem');
+  else if (cdState.mode === 'photo') showCdScreen('photo');
+  else showCdScreen('home');
+}
+
+async function selectCdCrop(cropName) {
+  cdState.crop = cropName === 'Not Sure' ? null : cropName;
+  await checkFollowUpOrExecuteDiagnosis();
+}
+
+/* ── PICTURE PROBLEM SELECTOR ── */
+function startCdProblemScreen() {
+  cdState.mode = 'problem';
+  showCdScreen('problem');
+}
+
+async function selectCdProblem(probType) {
+  cdState.problem_type = probType;
+  if (!cdState.crop) {
+    showCdScreen('crop');
+  } else {
+    await checkFollowUpOrExecuteDiagnosis();
+  }
+}
+
+/* ── PHOTO CAPTURE & PREVIEW ── */
+function handleCdPhotoCapture(e) {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+
+  cdState.mode = 'photo';
+  if (!cdState.images) cdState.images = [];
+
+  const maxAdd = Math.max(0, 5 - cdState.images.length);
+  const toAdd = files.slice(0, maxAdd);
+  if (!toAdd.length) {
+    showToast('Maximum 5 photos allowed');
+    return;
+  }
+
+  let loaded = 0;
+  toAdd.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      const b64 = dataUrl.split(',')[1];
+      cdState.images.push({
+        file: file,
+        b64: b64,
+        src: dataUrl,
+        name: file.name
+      });
+      loaded++;
+      if (loaded === toAdd.length) {
+        cdState.image_b64 = cdState.images[0] ? cdState.images[0].b64 : null;
+        renderCdPhotoGrid();
+        showCdScreen('photo');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function renderCdPhotoGrid() {
+  const grid = document.getElementById('cdPhotoGrid');
+  const countEl = document.getElementById('cdPhotoCountText');
+  const cropEl = document.getElementById('cdPhotoCropName');
+  if (cropEl) {
+    cropEl.textContent = cdState.crop || (cdState.lang === 'Marathi' ? 'फोटोवरून ओळखत आहे' : cdState.lang === 'Hindi' ? 'फोटो से पहचान हो रही है' : 'Auto-detecting from photo');
+  }
+
+  if (!grid) return;
+  if (!cdState.images || !cdState.images.length) {
+    grid.innerHTML = '<p style="color:var(--text3);font-size:13px">No photos selected</p>';
+    if (countEl) countEl.textContent = '';
+    return;
+  }
+
+  if (countEl) {
+    countEl.textContent = `📷 ${cdState.images.length} photo(s) selected (Max 5)`;
+  }
+
+  grid.innerHTML = cdState.images.map((img, i) => `
+    <div class="pest-preview-item" style="position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;border:2px solid var(--border);box-shadow:var(--shadow-sm)">
+      <img src="${img.src}" alt="Crop Photo ${i + 1}" style="width:100%;height:100%;object-fit:cover"/>
+      <button type="button" class="pest-preview-remove" onclick="removeCdPhoto(${i})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.65);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center" title="Remove photo">✕</button>
+      ${i === 0 ? '<span style="position:absolute;bottom:3px;left:3px;background:var(--g1);color:#fff;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700">Primary</span>' : ''}
+    </div>
+  `).join('');
+}
+
+function removeCdPhoto(idx) {
+  if (!cdState.images) return;
+  cdState.images.splice(idx, 1);
+  cdState.image_b64 = cdState.images.length ? cdState.images[0].b64 : null;
+  if (cdState.images.length === 0) {
+    showCdScreen('home');
+  } else {
+    renderCdPhotoGrid();
+  }
+}
+
+function resetCdPhotos() {
+  cdState.images = [];
+  cdState.image_b64 = null;
+  const notes = document.getElementById('cdPhotoNotes');
+  if (notes) notes.value = '';
+  showCdScreen('home');
+}
+
+function recordCdPhotoNotes() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Voice input is not supported in this browser. Please type symptoms.');
+    return;
+  }
+
+  const micBtn = document.getElementById('cdPhotoMicBtn');
+  const micIcon = document.getElementById('cdPhotoMicIcon');
+
+  if (cdState.isNotesRecording && cdState.notesRecognition) {
+    cdState.notesRecognition.stop();
+    return;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.lang = cdState.lang === 'Marathi' ? 'mr-IN' : (cdState.lang === 'Hindi' ? 'hi-IN' : 'en-IN');
+
+  rec.onstart = () => {
+    cdState.isNotesRecording = true;
+    if (micBtn) micBtn.classList.add('recording');
+    if (micIcon) micIcon.textContent = '🔴';
+  };
+
+  rec.onresult = (ev) => {
+    const text = ev.results[0][0].transcript;
+    const input = document.getElementById('cdPhotoNotes');
+    if (input) {
+      input.value = input.value ? `${input.value} ${text}` : text;
+    }
+  };
+
+  rec.onerror = () => {
+    cdState.isNotesRecording = false;
+    if (micBtn) micBtn.classList.remove('recording');
+    if (micIcon) micIcon.textContent = '🎤';
+  };
+
+  rec.onend = () => {
+    cdState.isNotesRecording = false;
+    if (micBtn) micBtn.classList.remove('recording');
+    if (micIcon) micIcon.textContent = '🎤';
+  };
+
+  cdState.notesRecognition = rec;
+  rec.start();
+}
+
+async function submitCdPhotoAnalysis() {
+  const notesEl = document.getElementById('cdPhotoNotes');
+  if (notesEl && notesEl.value.trim()) {
+    cdState.query = notesEl.value.trim();
+  }
+
+  if (!cdState.crop) {
+    // If crop is not set yet, offer quick picture crop selection or skip
+    showCdScreen('crop');
+  } else {
+    await checkFollowUpOrExecuteDiagnosis();
+  }
+}
+
+function submitCdQuickText() {
+  const input = document.getElementById('cdQuickTextInput');
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+
+  cdState.mode = 'quick_text';
+  cdState.query = text;
+
+  // Smart crop detection from typed text
+  const qLower = text.toLowerCase();
+  const cropMap = {
+    'Cotton': ['कापूस', 'कापसा', 'कपास', 'cotton', 'kapas'],
+    'Soybean': ['सोयाबीन', 'सोया', 'soybean', 'soya'],
+    'Tomato': ['टोमॅटो', 'टमाटर', 'tomato'],
+    'Onion': ['कांदा', 'कांद्या', 'प्याज', 'onion', 'pyaz'],
+    'Sugarcane': ['ऊस', 'उसा', 'गन्ना', 'sugarcane'],
+    'Wheat': ['गहू', 'गव्हा', 'गेहूं', 'wheat']
+  };
+
+  let detectedCrop = null;
+  for (const [cName, syns] of Object.entries(cropMap)) {
+    if (syns.some(s => qLower.includes(s))) {
+      detectedCrop = cName;
+      break;
+    }
+  }
+
+  if (detectedCrop) {
+    cdState.crop = detectedCrop;
+    checkFollowUpOrExecuteDiagnosis();
+  } else {
+    showCdScreen('crop');
+  }
+}
+
+/* ── SINGLE FOLLOW-UP QUESTION LOGIC ── */
+async function checkFollowUpOrExecuteDiagnosis() {
+  // If farmer already answered follow-up, proceed directly to diagnosis
+  if (cdState.plant_part || cdState.spread || cdState.timeline) {
+    await executeCdDiagnosis();
+    return;
+  }
+
+  // Ask backend if exactly ONE follow-up is relevant
+  try {
+    const res = await fetch(`${API_BASE}/api/crop-doctor/followup-check`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: cdState.query,
+        crop: cdState.crop,
+        problem_type: cdState.problem_type,
+        plant_part: cdState.plant_part,
+        spread: cdState.spread,
+        timeline: cdState.timeline,
+        language: cdState.lang
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.has_follow_up && data.question) {
+        renderCdFollowUpQuestion(data.question);
+        showCdScreen('followup');
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn("Followup check error:", e);
+  }
+
+  await executeCdDiagnosis();
+}
+
+function renderCdFollowUpQuestion(q) {
+  document.getElementById('cdFuQuestionText').textContent = q.question;
+  const container = document.getElementById('cdFuOptionsContainer');
+  container.innerHTML = '';
+
+  (q.options || []).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'cd-fu-btn';
+    btn.innerHTML = `<span>${escapeHtml(opt.label)}</span>`;
+    btn.onclick = () => selectCdFollowUpOption(q.id, opt.id);
+    container.appendChild(btn);
+  });
+}
+
+async function selectCdFollowUpOption(questionId, optionId) {
+  if (questionId === 'plant_part') cdState.plant_part = optionId;
+  else if (questionId === 'spread') cdState.spread = optionId;
+  else if (questionId === 'timeline') cdState.timeline = optionId;
+
+  await executeCdDiagnosis();
+}
+
+async function skipCdFollowUp() {
+  await executeCdDiagnosis();
+}
+
+/* ── EXECUTE DIAGNOSIS & RENDER 5 VISUAL CARDS ── */
+async function executeCdDiagnosis() {
+  showCdScreen('result');
+  document.getElementById('cdResultLoading').style.display = 'block';
+  document.getElementById('cdResultContent').style.display = 'none';
+
+  const imgList = (cdState.images && cdState.images.length)
+    ? cdState.images.map(img => img.b64)
+    : (cdState.image_b64 ? [cdState.image_b64] : null);
+
+  const primaryImg = cdState.image_b64 || (imgList && imgList[0]) || null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/crop-doctor/consult`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: cdState.query,
+        crop: cdState.crop,
+        problem_type: cdState.problem_type,
+        plant_part: cdState.plant_part,
+        spread: cdState.spread,
+        timeline: cdState.timeline,
+        image_base64: primaryImg,
+        images_base64: imgList,
+        language: cdState.lang,
+        district: currentDistrict || 'Maharashtra'
+      })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      cdState.lastDiagnosis = data;
+      renderCdDiagnosis(data);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Service unavailable');
+    }
+  } catch (e) {
+    document.getElementById('cdResultLoading').style.display = 'none';
+    const content = document.getElementById('cdResultContent');
+    content.style.display = 'block';
+    content.innerHTML = `
+      <div class="card" style="padding:22px;color:var(--red);text-align:center">
+        <h4 style="font-size:16px;font-weight:800;margin-bottom:8px">❌ तपासणी अयशस्वी झाली (Diagnosis Error)</h4>
+        <p style="font-size:14px;color:var(--text);margin-bottom:14px">${escapeHtml(e.message)}</p>
+        <button class="btn-primary" onclick="showCdScreen('home')">मुख्य स्क्रीनवर जा (Back to Home)</button>
+      </div>
+    `;
+  }
+}
+
+function renderCdDiagnosis(data) {
+  document.getElementById('cdResultLoading').style.display = 'none';
+  const content = document.getElementById('cdResultContent');
+  content.style.display = 'block';
+
+  document.getElementById('cdResultCropName').textContent = `${data.crop} · ${currentDistrict || 'Maharashtra'}`;
+  document.getElementById('cdValNoticed').textContent = data.symptoms_noticed || 'Normal foliage observations';
+  document.getElementById('cdValReason').textContent = data.possible_reasons || 'Nutrient variation or early sap pests';
+
+  const actionsContainer = document.getElementById('cdValActions');
+  actionsContainer.innerHTML = '';
+  const actionList = document.createElement('ul');
+  actionList.className = 'cd-action-list';
+
+  (data.immediate_actions || []).forEach((act, idx) => {
+    const li = document.createElement('li');
+    li.className = 'cd-action-item';
+    li.innerHTML = `
+      <div class="cd-action-num">${idx + 1}</div>
+      <div>${escapeHtml(act)}</div>
+    `;
+    actionList.appendChild(li);
+  });
+  actionsContainer.appendChild(actionList);
+
+  document.getElementById('cdValAvoid').textContent = data.what_to_avoid || 'Avoid spraying in midday heat or without safety mask.';
+
+  // Reset audio button state
+  cdState.isSpeaking = false;
+  const btn = document.getElementById('cdListenBtn');
+  if (btn) btn.classList.remove('speaking');
+  document.getElementById('cdListenIcon').textContent = '🔊';
+  document.getElementById('cdListenBtnText').textContent = CD_TEXTS[cdState.lang].listenBtn;
+}
+
+function toggleCdAudioNarration() {
+  if (cdState.isSpeaking) {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    cdState.isSpeaking = false;
+    const btn = document.getElementById('cdListenBtn');
+    if (btn) btn.classList.remove('speaking');
+    document.getElementById('cdListenIcon').textContent = '🔊';
+    document.getElementById('cdListenBtnText').textContent = CD_TEXTS[cdState.lang].listenBtn;
+    return;
+  }
+
+  if (!cdState.lastDiagnosis || !cdState.lastDiagnosis.audio_narration) return;
+  const text = cdState.lastDiagnosis.audio_narration;
+  const btn = document.getElementById('cdListenBtn');
+  btn.classList.add('speaking');
+  document.getElementById('cdListenIcon').textContent = '⏹️';
+  document.getElementById('cdListenBtnText').textContent = CD_TEXTS[cdState.lang].listenBtnStop;
+  cdState.isSpeaking = true;
+
+  speakText(text, btn, () => {
+    cdState.isSpeaking = false;
+    btn.classList.remove('speaking');
+    document.getElementById('cdListenIcon').textContent = '🔊';
+    document.getElementById('cdListenBtnText').textContent = CD_TEXTS[cdState.lang].listenBtn;
+  });
+}
+
+function continueCdInChat() {
+  switchPanel('chat');
+  if (cdState.lastDiagnosis) {
+    const summaryMsg = `[Crop Doctor Consultation Context]\nCrop: ${cdState.lastDiagnosis.crop}\nNoticed: ${cdState.lastDiagnosis.symptoms_noticed}\nReason: ${cdState.lastDiagnosis.possible_reasons}`;
+    appendMessageBubble('user', `I just checked my ${cdState.lastDiagnosis.crop} in Crop Doctor. ${cdState.lastDiagnosis.symptoms_noticed}`);
+    appendMessageBubble('bot', `I have reviewed your ${cdState.lastDiagnosis.crop} diagnosis. How can I further assist you with dosages, spraying schedules, or fertilizer calculations?`, cdState.lastDiagnosis.sources || []);
+  }
+}
+
+/* ── WEATHER MODULE ── */
+async function loadDistrictWeather(district) {
+  const area = document.getElementById('weatherContentArea');
+  area.innerHTML = '<div class="card" style="text-align:center;padding:20px"><div class="td" style="display:inline-block"></div><p style="margin-top:6px;font-size:12px">Fetching live weather...</p></div>';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/weather?district=${encodeURIComponent(district)}`);
+    if (res.ok) {
+      const w = await res.json();
+      area.innerHTML = `
+        <div class="weather-hero">
+          <div>
+            <div style="font-size:14px;font-weight:700;opacity:.9">📍 ${escapeHtml(w.district)}, Maharashtra</div>
+            <div class="wh-temp">${w.temperature_c.toFixed(1)}°C</div>
+            <div class="wh-cond">${escapeHtml(w.condition)}</div>
+            <div style="font-size:11px;opacity:.8;margin-top:6px">Last Updated: ${w.last_updated} · ${w.source}</div>
+          </div>
+          <div class="wh-details">
+            <div class="wh-badge">💧 Humidity: ${w.humidity_pct}%</div>
+            <div class="wh-badge">🌧️ Rain: ${w.rainfall_mm} mm</div>
+            <div class="wh-badge">💨 Wind: ${w.wind_speed_kmh} km/h</div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:16px">
+          <div class="card">
+            <h3>🚜 Spraying Window Advisory</h3>
+            <div class="advisory-box ${w.wind_speed_kmh > 15 || w.rainfall_mm > 2 ? 'adv-red' : w.temperature_c > 33 ? 'adv-yellow' : 'adv-green'}">
+              ${escapeHtml(w.spraying_advisory)}
+            </div>
+          </div>
+          <div class="card">
+            <h3>💧 Irrigation Recommendation</h3>
+            <div class="advisory-box adv-green">
+              ${escapeHtml(w.irrigation_advisory)}
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>📢 IMD Agromet Field Alerts</h3>
+          <ul>
+            ${w.agromet_alerts.map(a => `<li style="font-size:13px;margin-bottom:6px">${escapeHtml(a)}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+  } catch(e) {
+    area.innerHTML = `<div class="card" style="color:var(--red)">Weather service unavailable: ${e.message}</div>`;
+  }
+}
+
+/* ── MANDI PRICES MODULE ── */
+async function loadMandiPrices() {
+  const tbody = document.getElementById('mandiTableBody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px">Loading verified APMC wholesale records...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/market-prices`);
+    if (res.ok) {
+      const data = await res.json();
+      allMandiItems = data.commodities || [];
+      renderMandiRows(allMandiItems);
+    }
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red)">Failed to load mandi prices.</td></tr>';
+  }
+}
+
+function renderMandiRows(items) {
+  const tbody = document.getElementById('mandiTableBody');
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:16px">No commodity matches your search.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = items.map(c => `
+    <tr>
+      <td><strong>${escapeHtml(c.commodity)}</strong><br/><span style="font-size:11px;color:var(--text3)">${c.variety || 'Standard'}</span></td>
+      <td>${escapeHtml(c.market)}</td>
+      <td>${escapeHtml(c.unit)}</td>
+      <td>₹${c.min_price}</td>
+      <td class="price-modal">₹${c.modal_price}</td>
+      <td>₹${c.max_price}</td>
+      <td><span class="sev-badge sev-low">${escapeHtml(c.trend)}</span></td>
+      <td style="font-size:11.5px;color:var(--text3)">${c.report_date}</td>
+    </tr>
+  `).join('');
+}
+
+function filterMandiTable() {
+  const q = document.getElementById('mandiCommodityFilter').value.toLowerCase().trim();
+  if (!q) {
+    renderMandiRows(allMandiItems);
+    return;
+  }
+  const filtered = allMandiItems.filter(i =>
+    i.commodity.toLowerCase().includes(q) ||
+    i.market.toLowerCase().includes(q) ||
+    i.district.toLowerCase().includes(q)
+  );
+  renderMandiRows(filtered);
+}
+
+/* ── GOVERNMENT SCHEMES MODULE ── */
+async function loadSchemesList() {
+  const grid = document.getElementById('schemesListGrid');
+  try {
+    const res = await fetch(`${API_BASE}/api/schemes`);
+    if (res.ok) {
+      const data = await res.json();
+      const schemes = data.schemes || [];
+      grid.innerHTML = schemes.map(s => `
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;color:var(--g3);text-transform:uppercase;margin-bottom:3px">${escapeHtml(s.type)}</div>
+          <h3 style="font-size:16px">${escapeHtml(s.name)}</h3>
+          <p style="font-size:13px;font-weight:700;color:var(--g1);margin-bottom:8px">Benefit: ${escapeHtml(s.benefit_amount)}</p>
+          <p style="font-size:12.5px">${escapeHtml(s.eligibility)}</p>
+          <div style="font-size:11.5px;color:var(--text3);margin-bottom:12px">
+            <strong>Key Documents:</strong> ${s.required_documents.slice(0, 3).join(', ')}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <a href="${s.official_portal}" target="_blank" rel="noopener" class="btn-primary" style="font-size:11.5px;padding:6px 12px;text-decoration:none">
+              Official Portal ↗
+            </a>
+            <span style="font-size:11px;color:var(--text3)">Helpline: ${s.helpline}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {}
+}
+
+function openEligibilityModal() {
+  document.getElementById('eligibilityModal').classList.add('open');
+}
+function closeEligibilityModal() {
+  document.getElementById('eligibilityModal').classList.remove('open');
+}
+
+async function runEligibilityEvaluation() {
+  const saatbaara = document.getElementById('elSaatbaara').value === 'true';
+  const acres = parseFloat(document.getElementById('elAcres').value) || 2.0;
+  const taxpayer = document.getElementById('elTaxpayer').value === 'true';
+  const ekyc = document.getElementById('elEkyc').value === 'true';
+
+  const resArea = document.getElementById('eligibilityResultsArea');
+  resArea.innerHTML = '<div style="text-align:center;padding:12px">Evaluating official criteria...</div>';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/schemes/check`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        has_saatbaara: saatbaara,
+        land_acres: acres,
+        is_taxpayer: taxpayer,
+        ekyc_completed: ekyc
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      resArea.innerHTML = `
+        <div style="border-top:1.5px solid var(--border);padding-top:14px;margin-top:14px">
+          <h4 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:8px">Assessment Report:</h4>
+          ${data.schemes_evaluated.map(s => `
+            <div style="background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <strong>${escapeHtml(s.scheme_name)}</strong>
+                <span class="sev-badge ${s.status === 'Likely Eligible' || s.status === 'Eligible' ? 'sev-low' : 'sev-high'}">${escapeHtml(s.status)}</span>
+              </div>
+              <p style="font-size:12px;margin:4px 0">${escapeHtml(s.explanation)}</p>
+              <div style="font-size:11.5px;color:var(--g3)">👉 ${escapeHtml(s.next_step)}</div>
+            </div>
+          `).join('')}
+          <div style="font-size:10.5px;color:var(--text-muted);margin-top:6px">${escapeHtml(data.disclaimer)}</div>
+        </div>
+      `;
+    }
+  } catch(e) {
+    resArea.innerHTML = '<div style="color:var(--red)">Evaluation failed.</div>';
+  }
+}
+
+/* ── FERTILIZER CALCULATOR ── */
+function calculateFertilizerGuidance() {
+  const crop = document.getElementById('fertCrop').value;
+  const area = parseFloat(document.getElementById('fertArea').value);
+  const stage = document.getElementById('fertStage').value;
+  const box = document.getElementById('fertRecommendationBox');
+
+  let recHtml = '';
+  if (crop === 'Soybean') {
+    recHtml = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">🌱 Soybean Nutrient Schedule (${area} Acre - ${stage})</h4>
+        <p style="font-size:12.5px;margin-bottom:6px">Soybean is a legume fixing atmospheric nitrogen. Excessive chemical Nitrogen (Urea) reduces nodulation.</p>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li><strong>Basal NPK:</strong> Apply 30 kg DAP + 20 kg MOP (Muriate of Potash) per acre.</li>
+          <li><strong>Sulfur Requirement:</strong> Apply 10 kg elemental Sulfur or Bensulf per acre to boost seed oil content.</li>
+          <li><strong>Biofertilizers:</strong> Treat seed with <em>Rhizobium japonicum</em> + PSB @ 250 g per 10 kg seed before sowing.</li>
+        </ul>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Source: ICAR - Indian Institute of Soybean Research (IISR) Indore</div>
+      </div>
+    `;
+  } else if (crop === 'Cotton') {
+    recHtml = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">🌿 Cotton Bt Nutrient Schedule (${area} Acre - ${stage})</h4>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li><strong>Total Recommended Dose:</strong> 120:60:60 kg NPK/ha (approx 50:25:25 kg NPK/acre).</li>
+          <li><strong>Split Schedule:</strong> 20% N at sowing + full P and K. Apply 40% N at square formation (30-35 DAS) and 40% N at peak flowering.</li>
+          <li><strong>Magnesium Deficency Check:</strong> Spray 1% Magnesium Sulphate (MgSO4) @ 10 g/L water at 60 and 75 DAS to prevent leaf reddening (Lalya rog).</li>
+        </ul>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Source: ICAR-CICR Nagpur & MPKV Rahuri Cotton Package of Practices</div>
+      </div>
+    `;
+  } else if (crop === 'Onion') {
+    recHtml = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">🧅 Onion Nutrient Management (${area} Acre - ${stage})</h4>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li><strong>Recommended Dose:</strong> 100:50:50 kg NPK/ha (40:20:20 kg/acre).</li>
+          <li><strong>Application:</strong> Apply 50% N + full P and K at transplanting. Top-dress remaining 50% N in two equal splits at 30 and 45 days after transplanting.</li>
+          <li><strong>Potash Importance:</strong> Ensure adequate Potassium for compact bulb firmness, shelf-life, and purple blotch resistance.</li>
+        </ul>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Source: ICAR - DOGR Rajgurunagar (Pune)</div>
+      </div>
+    `;
+  } else {
+    recHtml = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">🌾 Balanced Integrated Plant Nutrition (${crop} - ${area} Acre)</h4>
+        <p style="font-size:12.5px">Standard recommendation based on soil testing:</p>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li>Incorporate 2-3 tons of well-decomposed Farm Yard Manure (FYM) or Vermicompost.</li>
+          <li>Seed treatment with Azotobacter / PSB biofertilizer @ 250 g / 10 kg seed.</li>
+          <li>Avoid applying chemical fertilizers directly touching seed kernels.</li>
+        </ul>
+      </div>
+    `;
+  }
+  box.innerHTML = recHtml;
+}
+
+/* ── IRRIGATION CALCULATOR ── */
+function calculateIrrigationGuidance() {
+  const soil = document.getElementById('irrigSoil').value;
+  const method = document.getElementById('irrigMethod').value;
+  const crop = document.getElementById('irrigCrop').value;
+  const box = document.getElementById('irrigRecommendationBox');
+
+  let text = '';
+  if (soil.includes('Heavy Black')) {
+    text = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">💧 Heavy Black Cotton Clay Irrigation Strategy (${crop})</h4>
+        <p style="font-size:12.5px">Black clay soils have very high moisture retention (>45% water capacity) but poor aeration when saturated.</p>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li><strong>Drip Interval:</strong> Run in-line drip for 1.5 to 2.5 hours every 2 days. Avoid continuous 5+ hour soaking which causes root asphyxiation and collar rot.</li>
+          <li><strong>Dripper Clogging Prevention:</strong> Due to hard groundwater in Maharashtra, perform Hydrochloric acid (HCl) treatment once every 45-60 days to dissolve carbonate salts.</li>
+          <li><strong>Drainage:</strong> Clear surface field trenches so heavy monsoon showers do not stagnate in crop beds.</li>
+        </ul>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Reference: MPKV Rahuri Dept of Irrigation & Drainage Engineering</div>
+      </div>
+    `;
+  } else {
+    text = `
+      <div style="background:var(--off-white);padding:14px;border-radius:8px;border:1px solid var(--border)">
+        <h4 style="font-size:14px;color:var(--g2);margin-bottom:6px">💧 Medium Loam / Light Soil Irrigation Strategy (${crop})</h4>
+        <ul style="font-size:12.5px;margin-left:18px">
+          <li><strong>Scheduling:</strong> Light soils drain fast. Provide frequent light waterings (1 to 1.5 hours daily or every alternate day).</li>
+          <li><strong>Mulching:</strong> Use organic crop trash or silver-black plastic mulch to reduce surface evaporation by 40%.</li>
+        </ul>
+      </div>
+    `;
+  }
+  box.innerHTML = text;
+}
+
+/* ── VOICE INPUT (Speech-to-Text) ── */
+function toggleVoiceSTT() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert('Voice input is not supported in this browser. Please use Google Chrome or Microsoft Edge.');
+    return;
+  }
+
+  const micBtn = document.getElementById('micBtn');
+
+  if (isVoiceRecording) {
+    if (speechRecognition) speechRecognition.stop();
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  speechRecognition = new SR();
+
+  // Map language codes
+  const langMap = {
+    Marathi: 'mr-IN',
+    Hindi: 'hi-IN',
+    English: 'en-IN',
+    Punjabi: 'pa-IN',
+    Tamil: 'ta-IN',
+    Telugu: 'te-IN',
+    Kannada: 'kn-IN',
+    Bengali: 'bn-IN',
+    Gujarati: 'gu-IN',
+    Urdu: 'ur-IN'
+  };
+
+  speechRecognition.lang = langMap[currentLang] || 'mr-IN';
+  speechRecognition.interimResults = true;
+  speechRecognition.continuous = false;
+
+  isVoiceRecording = true;
+  micBtn.classList.add('recording');
+  showToast('🎙️ Listening... Speak your farming question now');
+
+  speechRecognition.onresult = e => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    const inp = document.getElementById('userInput');
+    inp.value = transcript;
+    autoResize(inp);
+  };
+
+  speechRecognition.onend = () => {
+    isVoiceRecording = false;
+    micBtn.classList.remove('recording');
+    const val = document.getElementById('userInput').value.trim();
+    if (val) sendMessage();
+  };
+
+  speechRecognition.onerror = e => {
+    isVoiceRecording = false;
+    micBtn.classList.remove('recording');
+    showToast(`Microphone error: ${e.error || 'Check browser permissions'}`);
+  };
+
+  try {
+    speechRecognition.start();
+  } catch(err) {
+    isVoiceRecording = false;
+    micBtn.classList.remove('recording');
+  }
+}
+
+/* ── VOICE SYNTHESIS (Text-to-Speech) ── */
+function speakText(text, btn) {
+  if (!('speechSynthesis' in window)) {
+    alert('Text-to-speech is not supported on this browser.');
+    return;
+  }
+
+  if (window.speechSynthesis.speaking || activeSpeakSession) {
+    stopSpeech();
+    if (btn) {
+      btn.classList.remove('speaking');
+      btn.innerHTML = '🔊 Listen';
+    }
+    return;
+  }
+
+  // Strip emojis, markdown asterisks, URLs
+  const clean = text
+    .replace(/[\u{1F300}-\u{1FFFF}]/gu, '')
+    .replace(/[🌾🙏💧🌱🐛👉📸🔬✅❌⚠️👨‍🌾\*#_]/g, '')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!clean) return;
+
+  if (btn) {
+    btn.classList.add('speaking');
+    btn.innerHTML = '⏹️ Stop';
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  const session = { stopped: false, btn: btn };
+  activeSpeakSession = session;
+
+  const utter = new SpeechSynthesisUtterance(clean);
+  const langTag = currentLang === 'Marathi' ? 'mr-IN' : currentLang === 'Hindi' ? 'hi-IN' : 'en-IN';
+  utter.lang = langTag;
+  utter.rate = currentLang === 'Marathi' ? 0.82 : 0.88;
+
+  // Try to find matching regional voice
+  const matchedVoice = voices.find(v => v.lang.startsWith(langTag.split('-')[0])) || null;
+  if (matchedVoice) utter.voice = matchedVoice;
+
+  utter.onend = () => {
+    if (btn) {
+      btn.classList.remove('speaking');
+      btn.innerHTML = '🔊 Listen';
+    }
+    activeSpeakSession = null;
+  };
+  utter.onerror = () => {
+    if (btn) {
+      btn.classList.remove('speaking');
+      btn.innerHTML = '🔊 Listen';
+    }
+    activeSpeakSession = null;
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
+function stopSpeech() {
+  if (activeSpeakSession) activeSpeakSession = null;
+  if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+  document.querySelectorAll('.bm-btn').forEach(b => {
+    b.classList.remove('speaking');
+    b.innerHTML = '🔊 Listen';
+  });
+}
+
+/* ── FARMER PROFILE ── */
+async function loadFarmerProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/api/profile`);
+    if (res.ok) {
+      const p = await res.json();
+      currentDistrict = p.district || 'Pune';
+      document.getElementById('sbFarmerName').textContent = p.name;
+      document.getElementById('sbFarmerDistrict').textContent = `📍 ${p.district}, ${p.state}`;
+      document.getElementById('topbarDistrictText').textContent = p.district;
+      document.getElementById('profName').value = p.name;
+      document.getElementById('profDistrict').value = p.district;
+      document.getElementById('profSize').value = p.farm_size_acres;
+      document.getElementById('profCrops').value = p.primary_crops;
+    }
+  } catch(e) {}
+}
+
+async function saveFarmerProfile() {
+  const profile = {
+    name: document.getElementById('profName').value.trim() || 'Farmer',
+    district: document.getElementById('profDistrict').value,
+    state: 'Maharashtra',
+    farm_size_acres: document.getElementById('profSize').value.trim() || '3',
+    primary_crops: document.getElementById('profCrops').value.trim() || 'Soybean, Cotton',
+    irrigation_type: document.getElementById('profIrrig').value,
+    preferred_language: currentLang
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile)
+    });
+    if (res.ok) {
+      currentDistrict = profile.district;
+      document.getElementById('sbFarmerName').textContent = profile.name;
+      document.getElementById('sbFarmerDistrict').textContent = `📍 ${profile.district}, Maharashtra`;
+      document.getElementById('topbarDistrictText').textContent = profile.district;
+      closeProfileModal();
+      showToast('Profile saved successfully');
+      loadDistrictWeather(currentDistrict);
+    }
+  } catch(e) {
+    showToast('Failed to save profile');
+  }
+}
+
+function openProfileModal() { document.getElementById('profileModal').classList.add('open'); }
+function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
+
+/* ── UTILITIES ── */
+function formatMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code style="background:var(--bg2);padding:2px 5px;border-radius:4px">$1</code>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[m]);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

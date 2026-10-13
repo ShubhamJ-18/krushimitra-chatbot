@@ -1,0 +1,13 @@
+{
+  "id": "KB-IRRIG-005",
+  "title": "Smart Micro-Irrigation, Drip Maintenance and Crop Water Budgeting",
+  "topic": "Irrigation Management",
+  "crop": "Sugarcane, Vegetables, Orchards, Cotton",
+  "region": "Maharashtra, Karnataka, Gujarat",
+  "language": "mr, hi, en",
+  "source_name": "Mahatma Phule Krishi Vidyapeeth (MPKV) Rahuri Irrigation Department",
+  "source_url": "https://mpkv.ac.in/drip-irrigation-bulletin",
+  "publication_date": "2024-04-18",
+  "summary": "Drip irrigation saves 40-60% water, increases yield by 25-35%, and enables precise fertigation directly into crop root zones.",
+  "content": "Principles of Irrigation Scheduling: Avoid waterlogging and moisture stress during critical stages (germination, flowering, boll/pod/bulb formation). Rules of Thumb for Maharashtra Soils: In heavy black cotton soils (clay content >45%), operate drip for shorter intervals (1.5-2.5 hours every 2 days) to avoid root hypoxia. In light sandy loam soils, give frequent light applications (1-1.5 hours daily). Drip Maintenance Protocol: 1) Sand media & screen filter cleaning once a week; backflush when pressure differential exceeds 0.5 kg/cm2. 2) Acid treatment: For calcium/carbonate scaling (white salt deposits in drippers), inject commercial Hydrochloric Acid (HCl 33%) @ 0.5-1.0 liter per 1000 liter discharge to bring water pH down to 4.0; leave in sub-mains for 24 hours, then flush sub-mains and laterals thoroughly. 3) Chlorine treatment: For algae and bacterial slime clogging, inject Sodium Hypochlorite @ 20-30 ppm free chlorine. Government Subsidy: Under Pradhan Mantri Krishi Sinchayee Yojana (PMKSY) / MahaDBT 'Per Drop More Crop', small/marginal farmers receive 55% subsidy (up to ₹65,000/ha for drip, ₹28,000/ha for sprinkler) and other farmers receive 45% subsidy."
+}
