@@ -1530,8 +1530,10 @@ let speechRecognition = null;
 let activeSpeakSession = null;
 let allMandiItems = [];
 
-// API Base URL (relative for same origin)
-const API_BASE = window.location.origin;
+// API Base URL (relative for same origin; handles deployed origins and relative fallback)
+const API_BASE = (typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:'))
+  ? window.location.origin
+  : '';
 
 /* ── LOCALIZED UI STRINGS ── */
 const I18N = {

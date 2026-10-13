@@ -90,3 +90,51 @@ def test_vercel_configuration():
     assert "builds" not in data, "Legacy 'builds' causes Vercel settings warning"
     assert "rewrites" in data
     assert any(r.get("destination") == "/main.py" for r in data["rewrites"])
+
+def test_serve_index_root_returns_html():
+    """Verify GET / serves Chatbot.html with text/html content type."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers.get("content-type", "")
+    assert "KrushiMitra" in resp.text
+    assert "<!DOCTYPE html>" in resp.text
+
+def test_serve_index_main_py_returns_html():
+    """Verify GET /main.py gracefully serves Chatbot.html when Vercel rewrites to entrypoint."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.get("/main.py")
+    assert resp.status_code == 200
+    assert "text/html" in resp.headers.get("content-type", "")
+    assert "KrushiMitra" in resp.text
+
+def test_vercel_proxy_header_api_rewrites():
+    """Verify ASGI middleware rewrites /main.py with x-matched-path: /api/health to API route."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.get("/main.py", headers={"x-matched-path": "/api/health"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] in ["healthy", "degraded"]
+
+def test_static_asset_serving():
+    """Verify static directory assets (images, css, js) are served correctly."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    # Direct static path
+    resp_direct = client.get("/static/tomato_sample.jpg")
+    assert resp_direct.status_code == 200
+    assert resp_direct.headers.get("content-type") == "image/jpeg"
+    assert len(resp_direct.content) > 0
+
+    # Rewritten static path via Vercel proxy header
+    resp_rewritten = client.get("/main.py", headers={"x-matched-path": "/static/tomato_sample.jpg"})
+    assert resp_rewritten.status_code == 200
+    assert resp_rewritten.headers.get("content-type") == "image/jpeg"
+
