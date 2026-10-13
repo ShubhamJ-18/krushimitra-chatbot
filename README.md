@@ -136,6 +136,50 @@ Open your browser and navigate to:
 
 ---
 
+## 🗄️ Database Configuration & Vercel Deployment
+
+KrushiMitra AI supports both **PostgreSQL** (production & serverless) and **SQLite** (local testing & development).
+
+### 1. Root Cause of `sqlite3.OperationalError: unable to open database file` on Vercel
+Vercel serverless functions run in a stateless, read-only filesystem environment (only `/tmp` is temporarily writable and is wiped between invocations). When an application attempts to write to a local SQLite database (such as `./data/krushimitra.db`) on Vercel, SQLite fails with:
+```text
+sqlite3.OperationalError: unable to open database file
+```
+**Fix:** The application uses hosted PostgreSQL in production via the `DATABASE_URL` environment variable, while preserving SQLite for local offline development.
+
+### 2. Configuring `DATABASE_URL` on Vercel
+1. Create a free hosted PostgreSQL database on any provider, such as:
+   - **Neon**: [neon.tech](https://neon.tech) (Serverless PostgreSQL)
+   - **Supabase**: [supabase.com](https://supabase.com)
+   - **Render**: [render.com](https://render.com)
+   - **Railway**: [railway.app](https://railway.app)
+   - **AWS RDS** / **Google Cloud SQL**
+2. In your **Vercel Dashboard**:
+   - Go to your Project -> **Settings** -> **Environment Variables**.
+   - Add Key: `DATABASE_URL`
+   - Add Value: your PostgreSQL connection string, e.g.:
+     ```text
+     postgresql://username:password@ep-sample-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
+     ```
+   - Ensure the variable is enabled for **Production**, **Preview**, and **Development**.
+3. **Automatic URL Normalization:**
+   Hosted providers often prefix URLs with `postgres://` instead of `postgresql://`. The application automatically detects and normalizes `postgres://` to `postgresql://` so SQLAlchemy and `psycopg2-binary` connect smoothly without manual edits.
+4. **Safe Schema Initialization:**
+   On startup, `Base.metadata.create_all()` safely creates any missing tables (`conversations`, `messages`, `farmer_profiles`, `feedbacks`, `rag_documents`) without dropping or erasing existing farmer data. Verified RAG advisories are automatically ingested on first boot.
+
+### 3. Configuring `DATABASE_URL` Locally
+In your local `.env` file:
+- **For SQLite (Default)**:
+  ```env
+  DATABASE_URL=sqlite:///./data/krushimitra.db
+  ```
+- **For Local or Remote PostgreSQL**:
+  ```env
+  DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/krushimitra
+  ```
+
+---
+
 ## 📚 Adding New Documents to Knowledge Base (RAG)
 
 1. Create a new JSON file inside `data/knowledge_base/` following this structure:

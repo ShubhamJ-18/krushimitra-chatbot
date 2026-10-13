@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.config import settings
-from app.database import Base, engine, init_fts5_tables
+from app.database import check_database_connection, init_db_schema
 from app.services.rag_service import RAGService
 from app.api.chat import router as chat_router
 from app.api.crop_analysis import router as crop_analysis_router
@@ -25,12 +25,14 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Initializing KrushiMitra AI database and knowledge base...")
     try:
-        Base.metadata.create_all(bind=engine)
-        init_fts5_tables()
+        check_database_connection()
+        init_db_schema()
         indexed = RAGService.sync_knowledge_base()
-        logger.info(f"KrushiMitra AI initialized: {indexed} RAG documents indexed into full-text search.")
+        logger.info(f"KrushiMitra AI initialized: {indexed} RAG documents ready.")
     except Exception as e:
-        logger.error(f"Startup initialization error: {e}")
+        logger.critical(f"Startup initialization error: {e}")
+        if settings.is_production_or_vercel():
+            raise
     yield
     logger.info("KrushiMitra AI shutting down.")
 

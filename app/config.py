@@ -1,6 +1,8 @@
+import os
 from pathlib import Path
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional, List
+from typing import Optional, List, Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,7 +37,25 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3.2"
 
     # Database
-    DATABASE_URL: str = f"sqlite:///{BASE_DIR}/data/krushimitra.db"
+    DATABASE_URL: Optional[str] = None
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_db_url(cls, v: Any) -> Any:
+        if not v:
+            return v
+        v_str = str(v).strip()
+        # Handle postgres:// connection strings from providers like Supabase, Render, Neon
+        if v_str.startswith("postgres://"):
+            return "postgresql://" + v_str[len("postgres://"):]
+        return v_str
+
+    def model_post_init(self, __context: Any) -> None:
+        is_vercel = bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV"))
+        is_prod = self.ENVIRONMENT.lower() == "production" or is_vercel
+        # In local development without an explicit DATABASE_URL, default to SQLite
+        if not self.DATABASE_URL and not is_prod:
+            self.DATABASE_URL = f"sqlite:///{BASE_DIR}/data/krushimitra.db"
 
     # Weather & Mandi
     WEATHER_API_PROVIDER: str = "open-meteo"
@@ -45,6 +65,19 @@ class Settings(BaseSettings):
     # Defaults
     DEFAULT_REGION: str = "Maharashtra"
     DEFAULT_LANGUAGE: str = "English"
+
+    def get_database_url(self) -> str:
+        """
+        Returns the effective normalized database URL.
+        Converts postgres:// to postgresql:// for SQLAlchemy.
+        """
+        raw_url = (self.DATABASE_URL or "").strip()
+        if raw_url.startswith("postgres://"):
+            raw_url = "postgresql://" + raw_url[len("postgres://"):]
+        return raw_url
+
+    def is_production_or_vercel(self) -> bool:
+        return bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV") or self.ENVIRONMENT.lower() == "production")
 
     def get_groq_models(self) -> List[str]:
         models = [self.GROQ_TEXT_MODEL]

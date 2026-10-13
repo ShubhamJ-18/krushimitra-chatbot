@@ -12,20 +12,19 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-from app.database import Base, engine, init_fts5_tables, SessionLocal
+from app.database import engine, init_db_schema, SessionLocal
 from app.models.conversation import FarmerProfile
 from app.services.rag_service import RAGService
 
 def main():
     print("=" * 60)
-    print("[*] KrushiMitra AI - Database Initialization")
+    print(f"[*] KrushiMitra AI - Database Initialization ({engine.dialect.name})")
     print("=" * 60)
 
-    # 1. Create tables
-    print("1. Creating SQLite database schema...")
-    Base.metadata.create_all(bind=engine)
-    init_fts5_tables()
-    print("   [+] Schema created.")
+    # 1. Create tables safely
+    print(f"1. Creating database schema for {engine.dialect.name}...")
+    init_db_schema()
+    print("   [+] Schema verified and ready.")
 
     # 2. Seed default farmer profile if empty
     print("2. Seeding default farmer profile...")

@@ -21,10 +21,7 @@ def health_check(db: Session = Depends(get_db)):
 
     fts_count = 0
     try:
-        raw_conn = db.connection().connection
-        cursor = raw_conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM rag_documents_fts")
-        fts_count = cursor.fetchone()[0]
+        fts_count = RAGService.get_document_count(db)
     except Exception:
         pass
 

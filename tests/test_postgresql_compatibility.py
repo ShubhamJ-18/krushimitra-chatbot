@@ -1,0 +1,66 @@
+import os
+import pytest
+from unittest.mock import patch
+from app.config import Settings
+from app.database import Base, check_database_connection, engine
+from app.models.conversation import Conversation, Message, FarmerProfile, Feedback, RAGDocument
+from app.services.rag_service import RAGService
+
+def test_database_url_normalization_postgres_to_postgresql():
+    """Verify postgres:// URLs are automatically transformed to postgresql:// for SQLAlchemy."""
+    s = Settings(DATABASE_URL="postgres://user:secret123@neon.tech:5432/neondb")
+    assert s.DATABASE_URL == "postgresql://user:secret123@neon.tech:5432/neondb"
+    assert s.get_database_url() == "postgresql://user:secret123@neon.tech:5432/neondb"
+
+def test_database_url_normalization_standard_postgresql():
+    """Verify postgresql:// URLs remain intact."""
+    url = "postgresql://user:secret123@supabase.co:5432/postgres"
+    s = Settings(DATABASE_URL=url)
+    assert s.get_database_url() == url
+
+def test_root_main_imports_cleanly_without_database_url():
+    """Verify root main.py imports cleanly without raising errors at module import time."""
+    with patch.dict(os.environ, {"VERCEL": "1"}):
+        with patch.object(Settings, "get_database_url", return_value=""):
+            import main
+            assert hasattr(main, "app")
+            assert main.app is not None
+
+def test_missing_database_url_on_vercel_raises_clear_startup_error():
+    """Verify missing DATABASE_URL on Vercel is caught during startup verification."""
+    with patch.dict(os.environ, {"VERCEL": "1"}):
+        with patch.object(Settings, "get_database_url", return_value=""):
+            with pytest.raises(RuntimeError) as exc_info:
+                check_database_connection()
+            assert "DATABASE_URL environment variable is missing on Vercel" in str(exc_info.value)
+
+def test_sqlite_rejected_in_production_vercel():
+    """Verify SQLite database URL raises a clear error on Vercel / production."""
+    with patch.dict(os.environ, {"VERCEL": "1"}):
+        with patch.object(Settings, "get_database_url", return_value="sqlite:///./data/krushimitra.db"):
+            with pytest.raises(RuntimeError) as exc_info:
+                check_database_connection()
+            assert "SQLite cannot be used as the production database on Vercel" in str(exc_info.value)
+            assert "read-only filesystem" in str(exc_info.value)
+
+def test_all_models_registered_in_metadata():
+    """Verify all 5 application models are present in SQLAlchemy Base.metadata."""
+    tables = Base.metadata.tables.keys()
+    assert "conversations" in tables
+    assert "messages" in tables
+    assert "farmer_profiles" in tables
+    assert "feedbacks" in tables
+    assert "rag_documents" in tables
+
+def test_rag_sqlalchemy_search():
+    """Verify database-agnostic search on RAGDocument works with scoring."""
+    RAGService.sync_knowledge_base()
+    results = RAGService._search_sqlalchemy(safe_tokens=["bollworm", "cotton"], crop="Cotton", limit=2)
+    assert len(results) > 0
+    top = results[0]
+    assert "id" in top
+    assert "title" in top
+    assert "crop" in top
+    assert "content" in top
+    assert "Cotton" in top["crop"] or "Cotton" in top["title"]
+    assert top["score"] > 0

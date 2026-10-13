@@ -53,3 +53,19 @@ class Feedback(Base):
     rating = Column(Integer, nullable=False)
     comment = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utc_now)
+
+class RAGDocument(Base):
+    __tablename__ = "rag_documents"
+
+    id = Column(String(100), primary_key=True)
+    title = Column(String(255), nullable=False)
+    crop = Column(String(100), nullable=True)
+    topic = Column(String(100), nullable=True)
+    region = Column(String(100), nullable=True)
+    language = Column(String(50), default="English")
+    source_name = Column(String(255), nullable=True)
+    source_url = Column(Text, nullable=True)
+    publication_date = Column(String(50), nullable=True)
+    summary = Column(Text, nullable=True)
+    content = Column(Text, nullable=False)
+

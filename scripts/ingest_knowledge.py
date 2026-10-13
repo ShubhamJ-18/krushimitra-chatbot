@@ -14,18 +14,17 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
-from app.database import Base, engine, init_fts5_tables
+from app.database import engine, init_db_schema
 from app.services.rag_service import RAGService
 
 def main():
     print("=" * 65)
-    print("[*] KrushiMitra AI - Knowledge Base Ingestion")
+    print(f"[*] KrushiMitra AI - Knowledge Base Ingestion ({engine.dialect.name})")
     print("=" * 65)
 
-    # 1. Ensure DB & FTS tables exist
+    # 1. Ensure DB tables exist
     print("Checking database tables...")
-    Base.metadata.create_all(bind=engine)
-    init_fts5_tables()
+    init_db_schema()
 
     # 2. Ingest documents
     kb_path = ROOT_DIR / "data" / "knowledge_base"
