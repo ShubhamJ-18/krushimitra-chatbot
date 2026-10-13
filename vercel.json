@@ -7,6 +7,14 @@
   },
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/main.py?__path__=/api/$1"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "/main.py?__path__=/static/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/main.py"
     }

@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request
@@ -24,10 +25,10 @@ logger = logging.getLogger(__name__)
 class VercelPathRewriteMiddleware:
     """
     ASGI middleware ensuring reliable request routing when running behind Vercel serverless rewrites.
-    When vercel.json rewrites traffic to /main.py, Vercel sets ASGI scope['path'] to '/main.py'
-    while passing the original request path in proxy headers (x-matched-path, x-forwarded-uri, etc.).
-    This middleware restores the original requested path into scope['path'] so that FastAPI's router
-    matches the proper endpoints (/api/..., /static/..., /).
+    When vercel.json rewrites traffic to /main.py, Vercel sets ASGI scope['path'] to '/main.py'.
+    By configuring destination with '?__path__=...', the target path is preserved across Vercel
+    proxies. This middleware extracts the original target path, restores scope['path'], cleans
+    the query string, and routes seamlessly to FastAPI endpoints (/api/..., /static/..., /).
     """
     def __init__(self, app):
         self.app = app
@@ -36,20 +37,43 @@ class VercelPathRewriteMiddleware:
         if scope["type"] == "http":
             path = scope.get("path", "")
             if path == "/main.py" or path.startswith("/main.py/"):
-                headers = dict(scope.get("headers", []))
-                matched = (
-                    headers.get(b"x-matched-path", b"").decode("latin-1")
-                    or headers.get(b"x-forwarded-uri", b"").decode("latin-1")
-                    or headers.get(b"x-original-url", b"").decode("latin-1")
-                    or headers.get(b"x-rewrite-url", b"").decode("latin-1")
-                )
-                if matched and matched != "/main.py":
-                    clean = matched.split("?")[0]
+                target_path = None
+
+                # 1. Check query string for __path__ passed by Vercel rewrites
+                qs_bytes = scope.get("query_string", b"")
+                if b"__path__=" in qs_bytes:
+                    try:
+                        qs_str = qs_bytes.decode("latin-1")
+                        parsed = urllib.parse.parse_qs(qs_str, keep_blank_values=True)
+                        if "__path__" in parsed and parsed["__path__"]:
+                            target_path = parsed.pop("__path__")[0]
+                            # Clean __path__ out so handlers see only original request query parameters
+                            new_qs = urllib.parse.urlencode(parsed, doseq=True)
+                            scope["query_string"] = new_qs.encode("latin-1")
+                    except Exception as err:
+                        logger.warning(f"Error parsing __path__ from query string: {err}")
+
+                # 2. Check proxy headers as secondary fallback
+                if not target_path:
+                    headers = dict(scope.get("headers", []))
+                    matched = (
+                        headers.get(b"x-matched-path", b"").decode("latin-1")
+                        or headers.get(b"x-forwarded-uri", b"").decode("latin-1")
+                        or headers.get(b"x-original-url", b"").decode("latin-1")
+                        or headers.get(b"x-rewrite-url", b"").decode("latin-1")
+                    )
+                    if matched and matched != "/main.py":
+                        target_path = matched
+
+                # 3. Apply target path to ASGI scope
+                if target_path and target_path != "/main.py":
+                    clean = target_path.split("?")[0]
                     scope["path"] = clean
                     scope["raw_path"] = clean.encode("latin-1")
-                else:
+                elif scope.get("method", "GET") == "GET":
                     scope["path"] = "/"
                     scope["raw_path"] = b"/"
+
         await self.app(scope, receive, send)
 
 @asynccontextmanager

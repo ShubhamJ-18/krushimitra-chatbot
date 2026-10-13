@@ -138,3 +138,46 @@ def test_static_asset_serving():
     assert resp_rewritten.status_code == 200
     assert resp_rewritten.headers.get("content-type") == "image/jpeg"
 
+def test_chat_post_via_vercel_rewrite_returns_200():
+    """Verify POST /api/chat rewritten via Vercel __path__ parameter reaches chat handler and returns 200."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.post("/main.py?__path__=/api/chat", json={"message": "What is the recommended fertilizer for wheat?"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "conversation_id" in data
+    assert "message" in data
+    assert len(data["message"]) > 0
+
+def test_chat_post_invalid_payload_returns_422():
+    """Verify invalid POST payload returns 422 validation error instead of 405 Method Not Allowed."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.post("/main.py?__path__=/api/chat", json={})
+    assert resp.status_code == 422
+    data = resp.json()
+    assert "detail" in data
+
+def test_chat_post_direct_returns_200():
+    """Verify direct POST /api/chat returns 200 for local dev and standard calls."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.post("/api/chat", json={"message": "Namaste"})
+    assert resp.status_code == 200
+    assert "conversation_id" in resp.json()
+
+def test_api_weather_via_vercel_rewrite_with_query_params():
+    """Verify GET /api/weather preserves query parameters when rewritten by Vercel."""
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    resp = client.get("/main.py?__path__=/api/weather&district=Pune")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "district" in data
+    assert data["district"] == "Pune"
+
+
